@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { BrowserRouter as Router, Route, Switch, useHistory } from 'react-router-dom';
-import { gql, useMutation, useLazyQuery } from '@apollo/client';
-import { auth, signInWithGoogle, signInWithGithub } from './firebase/firebase.utils';
+import { gql, useMutation } from '@apollo/client';
 
 const Main = styled.div`
   height: 100vh;
@@ -40,13 +39,11 @@ mutation CreateWorkspace(
 `;
 
 export default function Page({loginUser, setLoginUser, loginAccount, setLoginAccount}){
-  const [createWorkspace, { loadingCreateWorkspace, errorCreateWorkspace, dataCreateWorkspace }] = useMutation(CREATE_WORKSPACE);
+  const [createWorkspace] = useMutation(CREATE_WORKSPACE);
   const [workspaceName, setWorkspaceName] = useState(null);
   const history = useHistory();
 
   const createWorkspaceHandler = () => {
-    console.log(workspaceName);
-
     if(workspaceName) {
       async function f(){
         const workspace = await createWorkspace({
@@ -64,7 +61,8 @@ export default function Page({loginUser, setLoginUser, loginAccount, setLoginAcc
   return (
     <Main>
       <WorkingArea>
-        <input type="name" placeholder="New Workspace name" defaultValue={workspaceName} onChange={(e) => setWorkspaceName(e.target.value)}></input>
+        <h2>New workspace</h2>
+        <input type="name" placeholder="workspace name" defaultValue={workspaceName} onChange={(e) => setWorkspaceName(e.target.value)}></input>
         <button onClick={createWorkspaceHandler}>Create</button>
       </WorkingArea>
     </Main>);

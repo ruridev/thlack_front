@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { BrowserRouter as Router, Route, Switch, useHistory } from 'react-router-dom';
 import { gql, useMutation } from '@apollo/client';
-import { auth, signInWithGoogle, signInWithGithub } from './firebase/firebase.utils';
+import { auth, signInWithGoogle, signInWithGithub } from '../firebase/firebase.utils';
 
 const Home = styled.div`
   height: 100vh;
@@ -50,22 +50,27 @@ const CREATE_ACCOUNT = gql`
   }
 `;
 
-export default function Page({loginUser, setLoginUser, loginAccount, setLoginAccount}){
-  const [createAccount, { loading, error, data }] = useMutation(CREATE_ACCOUNT);
+export default function Page({loginUser, setLoginUser, loginAccount, setLoginAccount, initFunction}){
+  const [createAccount, { loading, error, data: accountData }] = useMutation(CREATE_ACCOUNT);
 
   const history = useHistory();
 
   useEffect(() => {
+    if(initFunction){
+      initFunction();
+    }
+
     auth.onAuthStateChanged((user) => {
-      if(user == undefined || user == null){
+      if(user === undefined || user === null){
         setLoginAccount(null);
 
         history.push('/');
-      }else if(user.email != null){
+      }else if(user.email !== null){
+        console.log('Home effect');
         setLoginAccount(user);
 
         user.getIdToken(true).then(function(idToken) {
-          if(localStorage.setItem('kind') != 'user') {
+          if(localStorage.getItem('kind') !== 'user') {
             localStorage.setItem('kind', 'account')
             localStorage.setItem('token', idToken)
             async function f(){
@@ -80,9 +85,7 @@ export default function Page({loginUser, setLoginUser, loginAccount, setLoginAcc
             }
             f();
           }
-          history.push('/workspaces/1');
-        }).catch(function(error) {
-          // Handle error
+          history.push('/change_user');
         });
       }
     });
@@ -92,6 +95,7 @@ export default function Page({loginUser, setLoginUser, loginAccount, setLoginAcc
     };
     return cleanup;
   }, []);
+
 
   if (loading) return <div>loading...</div>;
   if (error)   return <div>error... {error[0]}</div>;

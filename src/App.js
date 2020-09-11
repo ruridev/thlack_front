@@ -3,16 +3,11 @@ import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import { ApolloProvider, ApolloClient, InMemoryCache } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
 import { createHttpLink } from "apollo-link-http";
-
-import HomePage from './Home'
-import Workspace from './Workspace'
-import NewWorkspace from './NewWorkspace'
-import NewChannel from './NewChannel'
-import ChangeUser from './ChangeUser'
+import { auth } from './firebase/firebase.utils';
+import { HomePage, ChangeUser, NewChannel, NewWorkspace, Workspace } from './pages';
 
 const authLink = setContext((_, {headers, ...context}) => {
   const token = localStorage.getItem('token');
-  console.log(token);
   return {
     headers: {
       ...headers,
@@ -28,12 +23,10 @@ const httpLink = createHttpLink({
 
 const client = new ApolloClient({
   link: authLink.concat(httpLink),
-  cache: new InMemoryCache({
-    resultCaching: false
-  })
+  cache: new InMemoryCache()
 });
 
-function App() {
+function App({cableApp}) {
   const [loginAccount, setLoginAccount] = useState(null);
   const [loginUser, setLoginUser] = useState(null);
 
@@ -43,12 +36,14 @@ function App() {
         <Router>
           <Switch>
             <Route path="/" component={() => <HomePage loginUser={loginUser} setLoginUser={setLoginUser} loginAccount={loginAccount} setLoginAccount={setLoginAccount} />} exact />
-            <Route path="/workspaces/new" component={() => <NewWorkspace loginUser={loginUser} setLoginUser={setLoginUser} loginAccount={loginAccount} setLoginAccount={setLoginAccount} />} exact />
-            <Route path="/workspaces/:workspace_id" component={() => <Workspace loginUser={loginUser} setLoginUser={setLoginUser} loginAccount={loginAccount} setLoginAccount={setLoginAccount} />} exact />
-            <Route path="/workspaces/:workspace_id/channels/new" component={() => <NewChannel loginUser={loginUser} setLoginUser={setLoginUser} loginAccount={loginAccount} setLoginAccount={setLoginAccount} />} exact />
-            <Route path="/workspaces/:workspace_id/:channel_id" component={() => <Workspace loginUser={loginUser} setLoginUser={setLoginUser} loginAccount={loginAccount} setLoginAccount={setLoginAccount} />} exact />
-            <Route path="/change_user" component={() => <ChangeUser loginUser={loginUser} setLoginUser={setLoginUser} loginAccount={loginAccount} setLoginAccount={setLoginAccount} />} exact />
-            
+            <Route path="/sigin" component={() => <HomePage loginUser={loginUser} setLoginUser={setLoginUser} loginAccount={loginAccount} setLoginAccount={setLoginAccount} />} exact />
+            <Route path="/signout" component={() => <HomePage initFunction={()=> auth.signOut() } loginUser={loginUser} setLoginUser={setLoginUser} loginAccount={loginAccount} setLoginAccount={setLoginAccount} />} exact />
+            <Route path="/workspaces" component={() => <Workspace cableApp={cableApp} loginUser={loginUser} setLoginUser={setLoginUser} loginAccount={loginAccount} setLoginAccount={setLoginAccount} />} exact />
+            <Route path="/workspaces/new" component={() => <NewWorkspace cableApp={cableApp} loginUser={loginUser} setLoginUser={setLoginUser} loginAccount={loginAccount} setLoginAccount={setLoginAccount} />} exact />
+            <Route path="/workspaces/:workspace_id" component={() => <Workspace cableApp={cableApp} loginUser={loginUser} setLoginUser={setLoginUser} loginAccount={loginAccount} setLoginAccount={setLoginAccount} />} exact />
+            <Route path="/workspaces/:workspace_id/channels/new" component={() => <NewChannel cableApp={cableApp} loginUser={loginUser} setLoginUser={setLoginUser} loginAccount={loginAccount} setLoginAccount={setLoginAccount} />} exact />
+            <Route path="/workspaces/:workspace_id/:channel_id" component={() => <Workspace cableApp={cableApp} loginUser={loginUser} setLoginUser={setLoginUser} loginAccount={loginAccount} setLoginAccount={setLoginAccount} />} exact />
+            <Route path="/change_user" component={() => <ChangeUser cableApp={cableApp} loginUser={loginUser} setLoginUser={setLoginUser} loginAccount={loginAccount} setLoginAccount={setLoginAccount} />} exact />  
           </Switch>
         </Router>
       </div>
