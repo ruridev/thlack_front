@@ -18,7 +18,7 @@ const authLink = setContext((_, {headers, ...context}) => {
 });
 
 const httpLink = createHttpLink({
-  uri: 'http://localhost:3001/graphql',
+  uri: 'https://thlack.herokuapp.com/graphql',
 });
 
 const client = new ApolloClient({

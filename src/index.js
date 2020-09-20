@@ -5,7 +5,7 @@ import actionCable from 'actioncable';
 import './index.css';
 
 const CableApp = {}
-CableApp.cable = actionCable.createConsumer('ws://localhost:3001/cable')
+CableApp.cable = actionCable.createConsumer('wss://thlack.herokuapp.com/cable')
 
 ReactDOM.render(
   <React.StrictMode>
