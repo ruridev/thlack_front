@@ -1,69 +1,35 @@
 import React, { useState } from 'react';
-import styled from 'styled-components';
-import { BrowserRouter as Router, Route, Switch, useHistory } from 'react-router-dom';
-import { gql, useMutation } from '@apollo/client';
+import { useHistory } from 'react-router-dom';
+import { useMutation } from '@apollo/client';
+import { Main, WorkingArea } from '../styles/NewWorkspace';
+import { CREATE_WORKSPACE } from '../queries';
 
-const Main = styled.div`
-  height: 100vh;
-  width: 100vw;
-  display: grid;
-  grid-template-areas: 
-    ". . ."
-    ". a ."
-    ". . .";
-  grid-template-columns: auto 153px auto;
-  grid-template-rows: auto 100px auto;
-`
-
-const WorkingArea = styled.div`
-  grid-area: a;
-  text-align: center;
-`
-
-// 워크스페이스 새로 만들기
-const CREATE_WORKSPACE = gql`
-mutation CreateWorkspace(
-  $name: String!
-) {
-  createWorkspace(
-    input: {
-      name: $name
+export default function Page(){
+  const [createWorkspace] = useMutation(CREATE_WORKSPACE, {
+    onCompleted({ createWorkspace: { workspace: { id } } }) {
+      history.push(`/workspaces/${id}/new`);
     }
-  )
-  {
-    workspace {
-      id
-    }
-  }
-}
-`;
+  });
 
-export default function Page({loginUser, setLoginUser, loginAccount, setLoginAccount}){
-  const [createWorkspace] = useMutation(CREATE_WORKSPACE);
   const [workspaceName, setWorkspaceName] = useState(null);
   const history = useHistory();
 
   const createWorkspaceHandler = () => {
-    if(workspaceName) {
-      async function f(){
-        const workspace = await createWorkspace({
-          variables: {
-            name: workspaceName
-          },
-        });
-        
-        history.push(`/workspaces/${workspace.data.createWorkspace.workspace.id}/channels/new`)
-      };
-      f();
-    }
+    createWorkspace({
+      variables: {
+        name: workspaceName,
+      },
+    });
   }
 
   return (
     <Main>
       <WorkingArea>
-        <h2>New workspace</h2>
-        <input type="name" placeholder="workspace name" defaultValue={workspaceName} onChange={(e) => setWorkspaceName(e.target.value)}></input>
-        <button onClick={createWorkspaceHandler}>Create</button>
+        <div>
+          <h2>Create Workspace</h2>
+          <input type="name" placeholder="Team Thlack"  defaultValue={workspaceName} onChange={(e) => setWorkspaceName(e.target.value)}></input>
+          <button onClick={createWorkspaceHandler}>Create</button>
+        </div>
       </WorkingArea>
     </Main>);
 }

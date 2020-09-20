@@ -1,104 +1,55 @@
 import React, { useEffect } from 'react';
-import styled from 'styled-components';
-import { BrowserRouter as Router, Route, Switch, useHistory } from 'react-router-dom';
-import { gql, useMutation } from '@apollo/client';
+import { useHistory } from 'react-router-dom';
+import { useMutation } from '@apollo/client';
 import { auth, signInWithGoogle, signInWithGithub } from '../firebase/firebase.utils';
+import { CREATE_ACCOUNT } from '../queries'
+import { Home, SignIn } from '../styles/Home';
 
-const Home = styled.div`
-  height: 100vh;
-  width: 100vw;
-  display: grid;
-  grid-template-areas: 
-    ". . ."
-    ". signin ."
-    ". . .";
-  grid-template-columns: 1fr 1fr 1fr;
-  grid-auto-rows: 1fr 1fr 1fr;
-`
-const SignIn = styled.div`
-  grid-area: signin;
-  padding: 4px;
-  border: 1px solid #000000;
-  text-align: center;
-`
-
-const CREATE_ACCOUNT = gql`
-  mutation CreateAccount(
-    $identifier: String!,
-    $providerId: String!,
-    $displayName: String,
-    $email: String!
-  ) {
-    createAccount(
-      input: {
-        credentials: {
-          identifier: $identifier,
-          providerId: $providerId
-        },
-        displayName: $displayName,
-        email: $email
-      }
-    )
+export default function Page(props){
+  const { loginAccount, setLoginAccount, initFunction } = props;
+  const [createAccount] = useMutation(
+    CREATE_ACCOUNT,
     {
-      account {
-        id
+      onCompleted({createAccount: { account }}) {
+        if(account){
+          history.push('/change_user');
+        }
       }
-      user {
-        id
-      }
-    }
-  }
-`;
-
-export default function Page({loginUser, setLoginUser, loginAccount, setLoginAccount, initFunction}){
-  const [createAccount, { loading, error, data: accountData }] = useMutation(CREATE_ACCOUNT);
+    });
 
   const history = useHistory();
 
   useEffect(() => {
-    if(initFunction){
-      initFunction();
-    }
+    let flag = true;
+    if(flag) {
+      if(initFunction){
+        initFunction();
+      }
 
-    auth.onAuthStateChanged((user) => {
-      if(user === undefined || user === null){
-        setLoginAccount(null);
-
-        history.push('/');
-      }else if(user.email !== null){
-        console.log('Home effect');
-        setLoginAccount(user);
-
-        user.getIdToken(true).then(function(idToken) {
-          if(localStorage.getItem('kind') !== 'user') {
+      auth.onAuthStateChanged((user) => {
+        if(user === undefined || user === null){
+          localStorage.setItem('kind', null)
+          localStorage.setItem('token', null)
+          setLoginAccount(null);
+          history.push('/');
+        }else if(user.email !== null && loginAccount == null){
+          setLoginAccount(user);
+          user.getIdToken(true).then(function(idToken) {
             localStorage.setItem('kind', 'account')
             localStorage.setItem('token', idToken)
-            async function f(){
-              const account = await createAccount({
-                variables: {
-                  identifier: user.uid,
-                  providerId: user.providerData[0].providerId,
-                  displayName: user.displayName,
-                  email: user.email,
-                },
-              });
-            }
-            f();
-          }
-          history.push('/change_user');
-        });
-      }
-    });
-
-    const cleanup = () => {
-      console.log('cleanup!');
-    };
-    return cleanup;
-  }, []);
-
-
-  if (loading) return <div>loading...</div>;
-  if (error)   return <div>error... {error[0]}</div>;
+            createAccount({
+              variables: {
+                identifier: user.uid,
+                providerId: user.providerData[0].providerId,
+                displayName: user.displayName,
+                email: user.email,
+              },
+            });
+          });
+        }
+      });
+    }
+  });
 
   return(
     <Home>
@@ -106,7 +57,6 @@ export default function Page({loginUser, setLoginUser, loginAccount, setLoginAcc
         <div>
           <h1>
             Thlack
-            
           </h1>
         </div> 
         <hr />

@@ -1,7 +1,25 @@
 import HomePage from './Home';
 import ChangeUser from './ChangeUser';
 import NewChannel from './NewChannel';
-import NewWorkspace from './NewWorkspace';
 import Workspace from './Workspace';
+import UserArea from './UserArea';
+import FriendArea from './FriendArea';
+import WorkspaceArea from './WorkspaceArea';
+import ChannelArea from './ChannelArea';
+import Chat from './Chat';
+import NewWorkspace from './NewWorkspace';
+import SearchWorkspace from './SearchWorkspace';
 
-export { HomePage, ChangeUser, NewChannel, NewWorkspace, Workspace };
+export {
+  HomePage,
+  ChangeUser, 
+  NewWorkspace,
+  NewChannel, 
+  Workspace, 
+  UserArea,
+  FriendArea,
+  WorkspaceArea,
+  ChannelArea,
+  Chat,
+  SearchWorkspace,
+};
