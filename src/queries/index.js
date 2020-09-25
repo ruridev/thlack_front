@@ -18,11 +18,28 @@ const GET_WORKSPACES = gql`
   }
 `;
 
-const GET_CHANNELS = gql`
-  query getChannels($workspace_id: Int!) {
-    channels(id: $workspace_id) {
-      id
+const GET_WORKSPACE = gql`
+  query getWorkspace($id: Int!) {
+    workspace(id: $id) {
       name
+      owners{
+        id
+      }
+    }
+  }
+`;
+
+const GET_WORKSPACE_WITH_CHANNELS = gql`
+  query getWorkspaceWithChannels($id: Int!) {
+    workspace(id: $id) {
+      name
+      owners {
+        id
+      }
+      channels {
+        id
+        name
+      }
     }
   }
 `;
@@ -56,8 +73,6 @@ const CREATE_MESSAGE = gql`
   }
 `;
 
-
-// 워크스페이스 검색하기
 const SEARCH_WORKSPACES = gql`
   query SearchWorkspaces($name: String!) {
     searchWorkspaces(name: $name) {
@@ -67,50 +82,42 @@ const SEARCH_WORKSPACES = gql`
   }
 `;
 
-// 워크스페이스 입장 리퀘스트
 const JOIN_REQUEST_WORKSPACE = gql`
-mutation JoinRequestWorkspace(
-  $workspace_id: Int!
-) {
-  joinRequestWorkspace(
-    input: {
-      workspace_id: $workspace_id
-    }
-  )
-  {
-    workspace {
-      id
+  mutation JoinRequestWorkspace(
+    $workspace_id: Int!
+  ) {
+    joinRequestWorkspace(
+      input: {
+        workspace_id: $workspace_id
+      }
+    )
+    {
+      workspace {
+        id
+      }
     }
   }
-}
 `;
 
 const CREATE_CHANNEL = gql`
-mutation CreateChannel(
-  $name: String!,
-  $workspace_id: Int!,
-) {
-  createChannel(
-    input: {
-      name: $name,
-      workspaceId: $workspace_id
-    }
-  )
-  {
-    channel {
-      id
+  mutation CreateChannel(
+    $name: String!,
+    $workspace_id: Int!,
+  ) {
+    createChannel(
+      input: {
+        name: $name,
+        workspaceId: $workspace_id
+      }
+    )
+    {
+      channel {
+        id
+      }
     }
   }
-}
 `;
 
-const GET_WORKSPACE = gql`
-  query getWorkspace($id: Int!) {
-    workspace(id: $id) {
-      name
-    }
-  }
-`;
 
 const JOIN_WORKSPACE = gql`
   mutation JoinWorkspace($workspace_id: Int!) {
@@ -143,39 +150,25 @@ const CREATE_ACCOUNT = gql`
     {
       account {
         id
+        users {
+          id
+        }
       }
-      user {
+    }
+  }
+`;
+
+const GET_ACCOUNT = gql`
+  query getAccount {
+    account {
+      users {
         id
+        name
       }
     }
   }
 `;
 
-
-
-
-// 유저 가져오기
-const GET_USERS = gql`
-  query getUsers {
-    users {
-      id
-      name
-    }
-  }
-`;
-
-// 토큰 취득하기
-const GET_USER_TOKEN = gql`
-  query GetUserToken($user_id: Int!) {
-    userToken(id: $user_id){
-      id
-      name
-      token
-    }
-  }
-`;
-
-// 토큰 취득하기
 const GET_USER = gql`
   query getUser($id: Int!) {
     user(id: $id){
@@ -185,7 +178,16 @@ const GET_USER = gql`
   }
 `;
 
-// 유저 새로 만들기
+const GET_USER_WITH_TOKEN = gql`
+  query getUser($id: Int!) {
+    user(id: $id){
+      id
+      name
+      token
+    }
+  }
+`;
+
 const CREATE_USER = gql`
 mutation CreateUser(
   $name: String!
@@ -198,6 +200,8 @@ mutation CreateUser(
   {
     user {
       id
+      name
+      token
     }
   }
 }
@@ -220,21 +224,49 @@ const CREATE_WORKSPACE = gql`
   }
 `;
 
+const DELETE_MESSAGE = gql`
+  mutation DeleteMessage($id: Int!) {
+    deleteMessage(
+      input: {
+        id: $id
+      }
+    )
+    {
+      message {
+        id
+      }
+    }
+  }
+`;
+
+const UPDATE_MESSAGE = gql`
+  mutation UpdateMessage($body: String, $id: Int!) {
+    updateMessage(input: { body: $body, id: $id }) {
+      message {
+        id
+      }
+    }
+  }
+`;
+
+
 export {
   CREATE_MESSAGE, 
   GET_MY_WORKSPACES,
-  GET_CHANNELS, 
+  GET_WORKSPACE, 
+  GET_WORKSPACE_WITH_CHANNELS,
   GET_LOGIN_USER, 
   JOIN_CHANNEL, 
   GET_WORKSPACES,
   CREATE_CHANNEL,
-  GET_WORKSPACE, 
   SEARCH_WORKSPACES,
   JOIN_WORKSPACE,
   CREATE_ACCOUNT,
-  GET_USERS,
-  GET_USER_TOKEN,
+  GET_ACCOUNT,
+  GET_USER_WITH_TOKEN,
   GET_USER,
   CREATE_USER,
-  CREATE_WORKSPACE
+  CREATE_WORKSPACE,
+  DELETE_MESSAGE,
+  UPDATE_MESSAGE,
 };

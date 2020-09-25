@@ -5,6 +5,7 @@ const WorkspaceNavigator = styled.div`
   background-color: black;
   color: white;
   overflow: hidden;
+
   :hover {
     overflow: auto;
   }

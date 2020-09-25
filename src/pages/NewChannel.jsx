@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, useHistory, useParams } from 'react-router-dom';
 import { useMutation, useLazyQuery } from '@apollo/client';
-import { GET_WORKSPACE, CREATE_CHANNEL } from '../queries'
+import { GET_WORKSPACE_WITH_CHANNELS, CREATE_CHANNEL } from '../queries'
+import { LinkButton, InputTextBox, SubmitButton } from '../styles/';
 import { Main, WorkingArea } from '../styles/NewChannel';
 
 export default function Page(){
-  const [getWorkspace, { data: workspaceData }] = useLazyQuery(GET_WORKSPACE);
+  const [getWorkspaceWithChannels, { data: workspaceData }] = useLazyQuery(GET_WORKSPACE_WITH_CHANNELS);
 
   const { workspaceId } = useParams();
 
@@ -22,7 +23,7 @@ export default function Page(){
     let flag = true;
     if (flag) {
       if (workspaceId) {
-        getWorkspace({variables: { id: parseInt(workspaceId) }});
+        getWorkspaceWithChannels({variables: { id: parseInt(workspaceId) }});
       }
     }
 
@@ -45,8 +46,11 @@ export default function Page(){
       <WorkingArea>
         <div>
           <h2>{workspaceData && workspaceData.workspace.name}</h2>
-          <input type="name" placeholder="general"  defaultValue={channelName} onChange={(e) => setChannelName(e.target.value)}></input>
-          <button onClick={createChannelHandler}>Create</button>
+          <InputTextBox type="name" placeholder="general"  defaultValue={channelName} onChange={(e) => setChannelName(e.target.value)}></InputTextBox>
+          <SubmitButton onClick={createChannelHandler}>Create</SubmitButton>
+          <br />
+          {workspaceData && workspaceData.workspace.channels.length > 0 && <p>👇 만들려는 채널이 이미 존재하나요? 👇</p> }
+          {workspaceData && workspaceData.workspace.channels.map((channel) => <LinkButton onClick={() => { history.push(`/workspaces/${workspaceId}/${channel.id}`)}}>{channel.name}</LinkButton>)}
         </div>
       </WorkingArea>
     </Main>);

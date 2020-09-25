@@ -1,34 +1,36 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, useHistory } from 'react-router-dom';
 import { useLazyQuery, useMutation } from '@apollo/client';
-import { Main, WorkingArea, ChangeUserButton } from '../styles/ChangeUser';
-import { GET_USERS, GET_USER_TOKEN, CREATE_USER } from '../queries';
+import { InputTextBox, SubmitButton, LinkDiv } from '../styles';
+import { Main, WorkingArea } from '../styles/ChangeUser';
+import { GET_ACCOUNT, GET_USER_WITH_TOKEN, CREATE_USER } from '../queries';
 
 export default function Page(props){
   const [createUser] = useMutation(CREATE_USER, {
-    onCompleted({createUser: { user: { id } }}){
-      getUserTokenHandler(id);
+    onCompleted({createUser: { user }}){
+      props.setLoginUserHandler(user);
+      history.push('/workspaces');
     }
   });
-  const [getUsers, { data: usersData }] = useLazyQuery(GET_USERS, { fetchPolicy: `network-only` });
+  const [getAccount, { data: accountData }] = useLazyQuery(GET_ACCOUNT, { fetchPolicy: `network-only` });
 
-  const [getUserToken] = useLazyQuery(GET_USER_TOKEN, {
+  const [getUserWithToken] = useLazyQuery(GET_USER_WITH_TOKEN, {
     fetchPolicy: `network-only`,
-    onCompleted({ userToken }){
-      props.setLoginUserHandler(userToken);
+    onCompleted({ user }){
+      props.setLoginUserHandler(user);
       history.push('/workspaces');
     }
   });
 
-  const [selectedUserId, setSelectedUserId] = useState(null);
-  const [userName, setUserName] = useState(null);
+  const [userName, setUserName] = useState('');
   const history = useHistory();
+  const inputRef = useRef();
 
   useEffect(() => {
     let flag = true;
 
     if(flag){
-      getUsers();
+      getAccount();
     }
 
     return function () {
@@ -36,15 +38,19 @@ export default function Page(props){
     }
   }, [])
 
-  const getUserTokenHandler = (user_id) => {
-    setSelectedUserId(user_id);
-    getUserToken({
+  const getUserWithTokenHandler = (user_id) => {
+    getUserWithToken({
       variables: {
-        user_id: parseInt(user_id)
+        id: parseInt(user_id)
       },
     });
   }
   const createUserHandler = () => {
+    if(userName?.trim().length === 0){
+      inputRef.current.focus();
+      return false;
+    }
+
     createUser({
       variables: {
         name: userName
@@ -57,14 +63,13 @@ export default function Page(props){
       <WorkingArea>
         <h2>Select user</h2>
         <div>
-          {usersData && usersData.users.map((user) => 
-          <ChangeUserButton key={user.id} onClick={() => getUserTokenHandler(user.id)}>{user.name}</ChangeUserButton>
+          {accountData && accountData.account.users.map((user) => 
+          <LinkDiv key={user.id} onClick={() => getUserWithTokenHandler(user.id)}>{user.name}</LinkDiv>
           )}
-          {usersData && usersData.users.length > 0 && <hr/>}
+          {accountData && accountData.account.users.length > 0 && <div><br />------------ OR ------------<br /><br /></div>}
 
-          <input type="text" placeholder="new user" onChange={(e) => setUserName(e.target.value)}></input>
-          <br/>
-          <button onClick={createUserHandler}>Create new user</button>
+          <InputTextBox type="text" placeholder="New user" ref={inputRef} onChange={(e) => setUserName(e.target.value)}></InputTextBox>
+          <SubmitButton onClick={createUserHandler}>만들기</SubmitButton>
         </div>
       </WorkingArea>
     </Main>);

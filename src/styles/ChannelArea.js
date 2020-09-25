@@ -15,6 +15,7 @@ const NewChannel = styled.div`
   cursor: pointer;
   }
 `;
+
 const ChannelButton = styled.div`
   padding: 8px;
 

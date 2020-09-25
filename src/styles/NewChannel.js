@@ -5,11 +5,11 @@ const Main = styled.div`
   width: 100vw;
   display: grid;
   grid-template-areas: 
-    ". . ."
-    ". a ."
-    ". . .";
-  grid-template-columns: auto 153px auto;
-  grid-template-rows: auto 100px auto;
+    ". . . ."
+    ". a a ."
+    ". . . .";
+  grid-template-columns: auto 200px auto;
+  grid-template-rows: auto 200px auto;
 `
 
 const WorkingArea = styled.div`
@@ -17,4 +17,4 @@ const WorkingArea = styled.div`
   text-align: center;
 `
 
-export { Main, WorkingArea };
+export { Main, WorkingArea};

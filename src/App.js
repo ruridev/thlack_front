@@ -18,13 +18,14 @@ const authLink = setContext((_, {headers, ...context}) => {
 });
 
 const httpLink = createHttpLink({
-  uri: 'https://thlack.herokuapp.com/graphql',
+  uri: (process.env.REACT_APP_THLACK_ENV === 'production' ? 'https://thlack.herokuapp.com/graphql' : 'http://localhost:3001/graphql')
 });
 
 const client = new ApolloClient({
   link: authLink.concat(httpLink),
   cache: new InMemoryCache()
 });
+
 
 function App({cableApp}) {
   const [loginAccount, setLoginAccount] = useState(null);
@@ -81,3 +82,28 @@ function App({cableApp}) {
 }
 
 export default App;
+
+
+
+
+function mapStateToProps({ categories, login_user }) {
+  return { categories, login_user };
+}
+
+const mapDispatchToProps = (dispatch, ownProps) => {
+  return {
+    onClick: () => {
+      dispatch(signOut());
+      ownProps.history.push('/');
+    },
+    init: () => {
+      const token = cookie.get('token');
+      dispatch(getCategories());
+      if (token) {
+        dispatch(loginCheck(token));
+      }
+    },
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Header);

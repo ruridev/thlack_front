@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useMutation } from '@apollo/client';
+import { InputTextBox, SubmitButton } from '../styles';
 import { Main, WorkingArea } from '../styles/NewWorkspace';
 import { CREATE_WORKSPACE } from '../queries';
 
@@ -27,8 +28,8 @@ export default function Page(){
       <WorkingArea>
         <div>
           <h2>Create Workspace</h2>
-          <input type="name" placeholder="Team Thlack"  defaultValue={workspaceName} onChange={(e) => setWorkspaceName(e.target.value)}></input>
-          <button onClick={createWorkspaceHandler}>Create</button>
+          <InputTextBox type="name" placeholder="Team Thlack"  defaultValue={workspaceName} onChange={(e) => setWorkspaceName(e.target.value)}></InputTextBox>
+          <SubmitButton onClick={createWorkspaceHandler}>만들기</SubmitButton>
         </div>
       </WorkingArea>
     </Main>);

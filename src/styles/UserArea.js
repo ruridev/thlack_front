@@ -2,6 +2,14 @@ import styled from 'styled-components';
 
 const LoginUserNavigator = styled.div`
   grid-area: user;
+background-color: white;
+  @media (max-width: 768px) {
+    height: 300px;
+    left: 200px;
+    position: fixed;
+    overflow: auto;
+    z-index: 9999;
+  }
 `;
 
 const LoginUserButton = styled.div`
