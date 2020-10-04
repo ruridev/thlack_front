@@ -5,6 +5,7 @@ const LinkDiv = styled.div`
 
   :hover{
     text-decoration: underline dotted navy;
+    background-color: ${({ theme }) => theme.hoverBackground};
   }
 
   @media (max-width: 768px) {
@@ -27,10 +28,11 @@ const LinkButton = styled.a`
 `
 const SmallLinkButton = styled(LinkButton)`
   font-size: small;
+  color: ${({ theme }) => theme.color};
 `
 
 const InputTextBox = styled.input`
-  border: 1px solid #cccccc;
+  border: 1px solid ${({ theme }) => theme.borderColor};
   margin: 4px;
   
   @media (max-width: 768px) {
@@ -40,21 +42,39 @@ const InputTextBox = styled.input`
 
 const SubmitButton = styled.button`
   margin: 4px;
+  border: 1px solid ${({ theme }) => theme.borderColor};
+  background-color: ${({ theme }) => theme.backgroundColor};
+  color: ${({ theme }) => theme.color};
 `
 
 const ListPopup = styled.div`
-  background-color: white;
-  border: 1px solid #cccccc;
+  border: 1px solid ${({ theme }) => theme.borderColor};
   border-radius: 4px;
   max-width: 500px;
   max-height: 500px;
   overflow: auto;
-  box-shadow: 8px 8px 0px 0 rgba(0, 0, 0, .5);
+  box-shadow: 8px 8px 0px 0 ${({ theme }) => theme.boxShadow};
+  background-color: ${({ theme }) => theme.backgroundColor};
 
   div {
     margin: 4px;
   }
 `
+
+const TextArea = styled.textarea`
+  width: calc(100% - 8px);
+  border: 1px solid ${({ theme }) => theme.borderColor};
+  background-color: ${({ theme }) => theme.backgroundColor};
+  color: ${({ theme }) => theme.color};
+  
+  @media (max-width: 768px) {
+    font-size: 16px !important;
+  }
+
+  :focus {
+    outline: none;
+}
+`;
 
 export { 
   LinkDiv,
@@ -63,4 +83,5 @@ export {
   SubmitButton,
   SmallLinkButton,
   ListPopup,
+  TextArea,
 };

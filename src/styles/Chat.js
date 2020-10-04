@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
 const Chat = styled.div`
-  height: 100vh;
+  height: calc(100vh - 12px); 
   display: grid;
   grid-template-areas:
     'top'
@@ -14,7 +14,7 @@ const WorkspaceChannelName = styled.h2`
   grid-area: top;
   text-align: center;
   margin: 0 auto;
-  color: rgba(0, 0, 0, 0.6);
+  color: ${({ theme }) => theme.workspaceChannelNameColor};
 `;
 
 const MessageList = styled.div`
@@ -27,7 +27,7 @@ const Message = styled.div`
   padding: 8px;
 
   :hover {
-    background-color: #dddddd;
+    background-color: ${({ theme }) => theme.hoverBackground};
   }
 
   blockquote {
@@ -35,7 +35,7 @@ const Message = styled.div`
     margin-block-end: 0;
     margin-inline-start: 0;
     margin-inline-end: 0;
-    border-left: 4px solid #999999;
+    border-left: 4px solid ${({ theme }) => theme.mdBlockquoteLineColor};
     padding: 4px 8px; 
     
     p {
@@ -43,18 +43,20 @@ const Message = styled.div`
       margin-block-end: 0;
       margin-inline-start: 0;
       margin-inline-end: 0;
-      color: #555555;
+      color: ${({ theme }) => theme.mdBlockquoteColor};
     }
   }
 
   pre {
-    background-color: black;
-    color: #99ff00;
+    background-color: ${({ theme }) => theme.mdCodeBackgroundColor};
+    color: ${({ theme }) => theme.mdCodeColor};
+    border: 1px solid ${({ theme }) => theme.mdCodeBorderColor};
+
     padding: 8px;
   }
 
   del {
-    color: #aaaaaa;
+    color: ${({ theme }) => theme.mdDelColor};
   }
 
   ul {
@@ -69,21 +71,12 @@ const MessageInputArea = styled.div`
 
 `;
 
-const MessageInput = styled.textarea`
-  width: 100%;
-  margin: 4px;
-  border: 1px solid #cccccc;
-  
-  @media (max-width: 768px) {
-    font-size: 16px !important;
+const ReplyTitle = styled.small`
+  :hover::before {
+    content:"Check the ";
   }
 `;
 
-const ReplyTitle = styled.small`
-  :hover::after {
-    content:"을 확인하기";
-  }
-`;
 
 export {
   Chat,
@@ -91,7 +84,6 @@ export {
   MessageList, 
   Message, 
   MessageInputArea,
-  MessageInput, 
   ReplyTitle,
 };
 

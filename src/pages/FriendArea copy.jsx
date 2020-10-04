@@ -12,8 +12,6 @@ const FriendsNavigator = styled.div`
   }
 `;
 const FriendButton = styled.div`
-  background-color: black;
-  color: white;
   padding: 8px;
 `;
 

@@ -1,76 +1,86 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { BrowserRouter as Router, useHistory } from 'react-router-dom';
+import React, { useRef, useCallback } from 'react';
+import { useHistory } from 'react-router-dom';
 import { useLazyQuery, useMutation } from '@apollo/client';
 import { InputTextBox, SubmitButton, LinkDiv } from '../styles';
 import { Main, WorkingArea } from '../styles/ChangeUser';
-import { GET_ACCOUNT, GET_USER_WITH_TOKEN, CREATE_USER } from '../queries';
+import { GET_LOGIN_USER, CREATE_USER } from '../queries';
+import { setCurrentUser, setToken } from '../action/cache';
+import { fetchWorkspaces } from '../action/workspace';
+import { connect } from 'react-redux';
 
-export default function Page(props){
-  const [createUser] = useMutation(CREATE_USER, {
-    onCompleted({createUser: { user }}){
-      props.setLoginUserHandler(user);
-      history.push('/workspaces');
-    }
-  });
-  const [getAccount, { data: accountData }] = useLazyQuery(GET_ACCOUNT, { fetchPolicy: `network-only` });
-
-  const [getUserWithToken] = useLazyQuery(GET_USER_WITH_TOKEN, {
-    fetchPolicy: `network-only`,
-    onCompleted({ user }){
-      props.setLoginUserHandler(user);
-      history.push('/workspaces');
-    }
-  });
-
-  const [userName, setUserName] = useState('');
+const Page = ({ current_account, setCurrentUserHandler, fetchWorkspacesHandler }) => {
   const history = useHistory();
   const inputRef = useRef();
 
-  useEffect(() => {
-    let flag = true;
-
-    if(flag){
-      getAccount();
+  const [createUser] = useMutation(CREATE_USER, {
+    onCompleted({createUser: { user }}){
+      setCurrentUserHandler(user);
+      history.push('/workspaces');
     }
-
-    return function () {
-      flag = false;
+  });
+  const [getLoginUser] = useLazyQuery(GET_LOGIN_USER, {
+    fetchPolicy: `network-only`,
+    onCompleted({ loginUser }){
+      setCurrentUserHandler(loginUser);    
+      fetchWorkspacesHandler(loginUser.workspaces);
+      
+      history.push('/workspaces');
     }
-  }, [])
+  });
 
-  const getUserWithTokenHandler = (user_id) => {
-    getUserWithToken({
+  const getLoginUserHandler = useCallback((user_id) => {
+    getLoginUser({
       variables: {
         id: parseInt(user_id)
       },
     });
-  }
-  const createUserHandler = () => {
-    if(userName?.trim().length === 0){
+  }, []);
+  const createUserHandler = useCallback(() => {
+    if(inputRef.current.value.trim().length === 0){
       inputRef.current.focus();
       return false;
     }
-
     createUser({
       variables: {
-        name: userName
+        name: inputRef.current.value
       },
     });
-  }
+  }, [inputRef]);
 
   return (
-    <Main>
+    current_account ? <Main>
       <WorkingArea>
         <h2>Select user</h2>
         <div>
-          {accountData && accountData.account.users.map((user) => 
-          <LinkDiv key={user.id} onClick={() => getUserWithTokenHandler(user.id)}>{user.name}</LinkDiv>
+          {current_account.users.map((user) => 
+            <LinkDiv key={user.id} onClick={() => getLoginUserHandler(user.id)}>{user.name}</LinkDiv>
           )}
-          {accountData && accountData.account.users.length > 0 && <div><br />------------ OR ------------<br /><br /></div>}
-
-          <InputTextBox type="text" placeholder="New user" ref={inputRef} onChange={(e) => setUserName(e.target.value)}></InputTextBox>
-          <SubmitButton onClick={createUserHandler}>만들기</SubmitButton>
+          {current_account.users.length > 0 && <div><br />------------ or ------------<br /><br /></div>}
+          <InputTextBox type="text" placeholder="New user" ref={inputRef}></InputTextBox>
+          <SubmitButton onClick={createUserHandler}>Create</SubmitButton>
         </div>
       </WorkingArea>
-    </Main>);
+    </Main> : null);
 }
+
+
+function mapStateToProps({ cache: { current_account } }) {
+  return { current_account };
+}
+
+function dispatchToProps(dispatch) {
+  return {
+    setCurrentUserHandler: (user) => {
+      dispatch(setCurrentUser(user));
+      dispatch(setToken({ kind: 'user', value: user.token }))
+      console.log("⭐️⭐️⭐️⭐️⭐️⭐️⭐️", user)
+      localStorage.setItem('kind', 'user')
+      localStorage.setItem('token', user.token)
+    },
+    fetchWorkspacesHandler: (workspaces) => {
+      dispatch(fetchWorkspaces(workspaces));
+    },
+  };
+}
+
+export default connect(mapStateToProps, dispatchToProps)(Page);

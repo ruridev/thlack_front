@@ -2,18 +2,52 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
 import actionCable from 'actioncable';
-import './index.css';
 import { Provider } from 'react-redux'
-import store from './store'
+import configureStore from './store';
+import reducer from './reducer'
+import { createHttpLink } from "apollo-link-http";
+import { setContext } from '@apollo/client/link/context';
+import { ApolloProvider, ApolloClient, InMemoryCache } from '@apollo/client';
+
+const httpLink = createHttpLink({
+  uri: (process.env.REACT_APP_THLACK_ENV === 'production' ? 
+          'https://thlack.herokuapp.com/graphql' :
+          'http://localhost:3001/graphql')
+});
+
+const authLink = setContext((_, {headers, ...context}) => {
+  const token = localStorage.getItem('token');
+  return {
+    headers: {
+      ...headers,
+      authorization: token ? `Bearer ${token}` : ''
+    },
+    ...context,
+  };
+});
+
+const client = new ApolloClient({
+  link: authLink.concat(httpLink),
+  cache: new InMemoryCache()
+});
+
+const store = configureStore(reducer, {});
 
 const CableApp = {}
-CableApp.cable = actionCable.createConsumer((process.env.REACT_APP_THLACK_ENV === 'production' ? 'wss://thlack.herokuapp.com/cable' : 'ws://localhost:3001/cable'))
+CableApp.cable = actionCable.createConsumer((process.env.REACT_APP_THLACK_ENV === 'production' ? 
+                                              'wss://thlack.herokuapp.com/cable' :
+                                              'ws://localhost:3001/cable'))
 
-ReactDOM.render(
-  <React.StrictMode>
+const render = () => {
+  ReactDOM.render(
     <Provider store={store}>
-      <App cableApp={CableApp} />
-    </Provider>
-  </React.StrictMode>,
-  document.getElementById('root')
-);
+      <ApolloProvider client={client}>
+        <App cableApp={CableApp} />
+      </ApolloProvider>
+    </Provider>,
+    document.getElementById('root')
+  );
+}
+
+store.subscribe(render);
+render();

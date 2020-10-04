@@ -9,6 +9,7 @@ import ChannelArea from './ChannelArea';
 import Chat from './Chat';
 import NewWorkspace from './NewWorkspace';
 import SearchWorkspace from './SearchWorkspace';
+import RefreshData from './RefreshData';
 
 export {
   HomePage,
@@ -22,4 +23,5 @@ export {
   ChannelArea,
   Chat,
   SearchWorkspace,
+  RefreshData,
 };

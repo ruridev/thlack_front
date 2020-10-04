@@ -1,12 +1,14 @@
 import React from 'react';
-import { FriendsNavigator, FriendButton } from '../styles/FriendArea';
+import { FriendsNavigator } from '../styles/FriendArea';
 
-export default function Page(props){
+export default function Page(){
   return (
     <FriendsNavigator>
-      {props.friendIds.map((friend_id) => (
+      {/*
+      {friendIds.map((friend_id) => (
         <FriendButton key={friend_id}>{props.userById(friend_id).name}</FriendButton>
       ))}
+      */}
     </FriendsNavigator>
   );
 }

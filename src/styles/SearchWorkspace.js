@@ -13,7 +13,6 @@ const Title = styled.h2`
   grid-area: top2;
   text-align: center;
   margin: 0 auto;
-  color: rgba(0, 0, 0, 0.6);
 `;
 
 const WorkingArea = styled.div`

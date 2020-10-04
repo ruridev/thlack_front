@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 
 export default function ChannelWebSocket({ cableApp, updateApp, channelId }){
+
   useEffect(() =>{
     let flag = true;
-    
-    if(flag && channelId){
+    if(flag && channelId && cableApp ){
       cableApp.channel = cableApp.cable.subscriptions.create({
           channel: 'WorkspacesChannel',
           channel_id: channelId

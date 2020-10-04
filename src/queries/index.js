@@ -5,6 +5,13 @@ const GET_MY_WORKSPACES = gql`
     myWorkspaces {
       id
       name
+      owners {
+        id
+      }
+      channels {
+        id
+        name
+      }
     }
   }
 `;
@@ -14,6 +21,9 @@ const GET_WORKSPACES = gql`
     workspaces {
       id
       name
+      owners {
+        id
+      }
     }
   }
 `;
@@ -45,23 +55,35 @@ const GET_WORKSPACE_WITH_CHANNELS = gql`
 `;
 
 const GET_LOGIN_USER = gql`
-  query getLoginUser {
-    loginUser{
+  query getLoginUser($id: Int) {
+    loginUser(id: $id){
       id
       name
-    }
-  }
-`;
-
-const JOIN_CHANNEL = gql`
-  mutation JoinChannel($workspace_id: Int!, $channel_id: Int!) {
-    joinChannel(input: { workspaceId: $workspace_id, channelId: $channel_id }) {
-      channel {
-        id
+      token
+      account {
+        users {
+          id
+          name
+        }
+      }
+      workspaces{
+        id  
+        name
+        owners {
+          id
+        }
+        channels{
+          id
+          name
+          owners {
+            id
+          }
+        }
       }
     }
   }
 `;
+
 
 const CREATE_MESSAGE = gql`
   mutation CreateMessage($body: String, $channel_id: Int!) {
@@ -113,6 +135,50 @@ const CREATE_CHANNEL = gql`
     {
       channel {
         id
+        name
+        users {
+          id
+          name
+        }
+        owners {
+          id
+          name
+        }
+        workspace {
+          id
+          name
+          channels {
+            id
+            name
+          }
+        }
+      }
+    }
+  }
+`;
+
+const JOIN_CHANNEL = gql`
+  mutation JoinChannel($workspace_id: Int!, $channel_id: Int!) {
+    joinChannel(input: { workspaceId: $workspace_id, channelId: $channel_id }) {
+      channel {
+        id
+        name
+        users {
+          id
+          name
+        }
+        owners {
+          id
+          name
+        }
+        workspace {
+          id
+          name
+          channels {
+            id
+            name
+          }
+        }
       }
     }
   }
@@ -152,6 +218,7 @@ const CREATE_ACCOUNT = gql`
         id
         users {
           id
+          name
         }
       }
     }
@@ -219,6 +286,14 @@ const CREATE_WORKSPACE = gql`
     {
       workspace {
         id
+        name
+        channels {
+          id
+          name
+        }
+        owners {
+          id
+        }
       }
     }
   }
@@ -255,10 +330,10 @@ export {
   GET_MY_WORKSPACES,
   GET_WORKSPACE, 
   GET_WORKSPACE_WITH_CHANNELS,
-  GET_LOGIN_USER, 
   JOIN_CHANNEL, 
-  GET_WORKSPACES,
   CREATE_CHANNEL,
+  GET_LOGIN_USER, 
+  GET_WORKSPACES,
   SEARCH_WORKSPACES,
   JOIN_WORKSPACE,
   CREATE_ACCOUNT,

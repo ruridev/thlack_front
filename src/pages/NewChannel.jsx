@@ -1,57 +1,77 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, useHistory, useParams } from 'react-router-dom';
-import { useMutation, useLazyQuery } from '@apollo/client';
-import { GET_WORKSPACE_WITH_CHANNELS, CREATE_CHANNEL } from '../queries'
+import React, { useRef, useCallback } from 'react';
+import { useHistory, useParams } from 'react-router-dom';
+import { useMutation } from '@apollo/client';
+import { CREATE_CHANNEL, JOIN_CHANNEL } from '../queries'
 import { LinkButton, InputTextBox, SubmitButton } from '../styles/';
 import { Main, WorkingArea } from '../styles/NewChannel';
+import { addChannel } from '../action/workspace';
+import { setMode } from '../action/cache';
+import { connect } from 'react-redux';
 
-export default function Page(){
-  const [getWorkspaceWithChannels, { data: workspaceData }] = useLazyQuery(GET_WORKSPACE_WITH_CHANNELS);
 
+const Page = ({ current_workspace, addChannelHandler, setModeHandler }) => {
+  const inputRef = useRef();
   const { workspaceId } = useParams();
+  const history = useHistory();
 
-  const [createChannel] = useMutation(CREATE_CHANNEL, {
-    onCompleted({createChannel: { channel: { id } }}){
-      history.push(`/workspaces/${workspaceId}/${id}`);
+  const [joinChannel] = useMutation(JOIN_CHANNEL, {
+    onCompleted({ joinChannel: { channel } }){
+      setModeHandler('chat');
+      history.push(`/workspaces/${workspaceId}/${channel.id}`);
     }
   });
 
-  const [channelName, setChannelName] = useState(null);
-  const history = useHistory();
+  const [createChannel] = useMutation(CREATE_CHANNEL, {
+    onCompleted({createChannel: { channel }}){
+      addChannelHandler(workspaceId, channel)
+      setModeHandler('chat');
+      history.push(`/workspaces/${workspaceId}/${channel.id}`);
+    }
+  });
 
-  useEffect(() => {
-    let flag = true;
-    if (flag) {
-      if (workspaceId) {
-        getWorkspaceWithChannels({variables: { id: parseInt(workspaceId) }});
-      }
+  const createChannelHandler = useCallback(() => {
+    if(inputRef.current.value.trim().length === 0){
+      inputRef.current.focus();
+      return false;
     }
 
-    return function (){
-      flag = false;
-    }
-  }, [workspaceId])
-
-  const createChannelHandler = () => {
     createChannel({
       variables: {
-        name: channelName,
+        name: inputRef.current.value,
         workspace_id: parseInt(workspaceId)
       },
     });
-  }
+  }, [inputRef, workspaceId]);
+
 
   return (
     <Main>
       <WorkingArea>
         <div>
-          <h2>{workspaceData && workspaceData.workspace.name}</h2>
-          <InputTextBox type="name" placeholder="general"  defaultValue={channelName} onChange={(e) => setChannelName(e.target.value)}></InputTextBox>
+          <h2>Create a channel in ”{current_workspace && `${current_workspace.name}”`}</h2>
+          <InputTextBox type="text" placeholder="general" ref={inputRef}></InputTextBox>
           <SubmitButton onClick={createChannelHandler}>Create</SubmitButton>
           <br />
-          {workspaceData && workspaceData.workspace.channels.length > 0 && <p>👇 만들려는 채널이 이미 존재하나요? 👇</p> }
-          {workspaceData && workspaceData.workspace.channels.map((channel) => <LinkButton onClick={() => { history.push(`/workspaces/${workspaceId}/${channel.id}`)}}>{channel.name}</LinkButton>)}
+          {current_workspace?.channels && current_workspace.channels.length > 0 && <p>↓ Already exist? ↓</p> }
+          {current_workspace?.channels && current_workspace.channels.map((channel) => <LinkButton key={channel.id} onClick={() => { history.push(`/workspaces/${workspaceId}/${channel.id}`)}}>{channel.name}</LinkButton>)}
         </div>
       </WorkingArea>
     </Main>);
 }
+
+function mapStateToProps({ cache: { current_workspace } }) {
+  return { current_workspace };
+}
+
+function dispatchToProps(dispatch, ownProps) {
+  return {
+    addChannelHandler: (workspace_id, channel) => {
+      dispatch(addChannel(workspace_id, channel));
+    },
+    setModeHandler: (mode) => {
+      dispatch(setMode(mode));
+    }
+  }
+}
+
+export default connect(mapStateToProps, dispatchToProps)(Page);

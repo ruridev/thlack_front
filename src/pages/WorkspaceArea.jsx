@@ -1,23 +1,56 @@
 import React from 'react';
+import { useParams } from 'react-router-dom';
 import { WorkspaceNavigator, SearchWorkspace, NewWorkspace, WorkspaceButton } from '../styles/WorkspaceArea';
+import { setCurrentWorkspace } from '../action/cache';
+import { connect } from 'react-redux';
+import { setMode } from '../action/cache';
 
-export default function Page(props){
+const Page = ({
+  workspaces,
+  onClickSearchWorkspace,
+  onClickNewWorkspace,
+  onClickWorkspaceLink,
+}) => {
+  const { workspaceId } = useParams();
+
   return (
     <WorkspaceNavigator>
-      <SearchWorkspace onClick={props.onClickSearchWorkspace}>Search</SearchWorkspace>
-      <NewWorkspace onClick={props.onClickNewWorkspace}>+New Workspace</NewWorkspace>
+      <SearchWorkspace onClick={onClickSearchWorkspace}>Search</SearchWorkspace>
+      <NewWorkspace onClick={onClickNewWorkspace }>+New Workspace</NewWorkspace>
       <div>
-      {props.myWorkspacesData?.myWorkspaces.filter((workspace)=> workspace.id === props.workspaceId).map((workspace) => (
+      {workspaces && workspaces.filter((workspace)=> workspace.id === workspaceId).map((workspace) => (
           <WorkspaceButton key={workspace.id}>
-            <b><div onClick={() => props.onClickWorkspaceLink(workspace.id)}>{workspace.name}</div></b>
+            <b><div onClick={() => onClickWorkspaceLink(workspace)}>{workspace.name}</div></b>
           </WorkspaceButton>
         ))}
-      {props.myWorkspacesData?.myWorkspaces.filter((workspace)=> workspace.id !== props.workspaceId).map((workspace) => (
+      {workspaces && workspaces.filter((workspace)=> workspace.id !== workspaceId).map((workspace) => (
           <WorkspaceButton key={workspace.id}>
-            <div onClick={() => props.onClickWorkspaceLink(workspace.id)}>{workspace.name}</div>
+            <div onClick={() => onClickWorkspaceLink(workspace)}>{workspace.name}</div>
           </WorkspaceButton>
         ))}
       </div>
     </WorkspaceNavigator>
   );
 }
+
+function mapStateToProps({ workspaces }) {
+  return { workspaces };
+}
+
+function dispatchToProps(dispatch, ownProps) {
+  return {
+    onClickSearchWorkspace: () => {
+      ownProps.history.push('/workspaces');
+    },
+    onClickNewWorkspace: () => {
+      ownProps.history.push('/workspaces/new');
+    },
+    onClickWorkspaceLink: (workspace) => {
+      dispatch(setCurrentWorkspace(workspace));
+      dispatch(setMode('welcome'));
+      ownProps.history.push(`/workspaces/${workspace.id}`);
+    },
+  }
+}
+
+export default connect(mapStateToProps, dispatchToProps)(Page);

@@ -1,62 +1,85 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useParams } from 'react-router-dom';
 import ChannelWebSocket from '../cables/ChannelWebSocket';
 import { useMutation } from '@apollo/client';
-import { SubmitButton, SmallLinkButton, ListPopup, LinkDiv, LinkButton } from '../styles';
-import { Chat, WorkspaceChannelName, MessageList,  Message,  MessageInputArea, MessageInput, ReplyTitle } from '../styles/Chat';
-import { CREATE_MESSAGE, DELETE_MESSAGE, UPDATE_MESSAGE } from '../queries'
+import { SubmitButton, SmallLinkButton, ListPopup, LinkDiv, LinkButton, TextArea } from '../styles';
+import { Chat, WorkspaceChannelName, MessageList,  Message,  MessageInputArea, ReplyTitle } from '../styles/Chat';
+import { CREATE_MESSAGE, DELETE_MESSAGE, UPDATE_MESSAGE, JOIN_CHANNEL } from '../queries'
 import ReactMarkdown from 'react-markdown'
 import Popup from 'reactjs-popup';
+import { setCurrentWorkspace,  fetchCurrentChannelData, fetchCurrentChannelMessages, fetchCurrentChannelUsers } from '../action/cache';
+import { connect } from 'react-redux';
 
-export default function Page(props){
+const Page = ({
+  cableApp,
+  current_user,
+  current_channel_users,
+  current_channel_messages,
+  fetchCurrentChannelDataHandler,
+  fetchCurrentChannelUsersHandler,
+  fetchCurrentChannelMessagesHandler, 
+  channelById, 
+  workspaceById, 
+  setCurrentWorkspaceHandler,
+}) => {
   const [createMessage] = useMutation(CREATE_MESSAGE);
   const [deleteMessage] = useMutation(DELETE_MESSAGE);
   const [updateMessage] = useMutation(UPDATE_MESSAGE);
+  const [joinChannel] = useMutation(JOIN_CHANNEL, {
+    onCompleted({ joinChannel: { channel } }){
+      setCurrentWorkspaceHandler(channel.workspace);
+    }
+  });
+
+  const joinChannelHandler = useCallback((channel_id) => {
+    joinChannel({variables: { workspace_id: parseInt(workspaceId), channel_id: parseInt(channel_id) } });
+  }, []);
 
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
   const editInputRef = useRef(null);
-  const [messageBody, setMessageBody] = useState('');
-  const [editMessage, setEditMessage] = useState(null);
-  //const [currentChannel, setCurrentChannel] = useState(null);
   const [data, setData] = useState([]);
   const [users, setUsers] = useState([]);
-  const [messages, setMessages] = useState([]);
 
-  useEffect(()=>{
+  const { workspaceId, channelId } = useParams();
+
+  useEffect(() => {
     if (bottomRef && bottomRef.current) {
       bottomRef.current.scrollIntoView({ behavior: "smooth" });
-      console.log("scrollIntoView");
     }
   },[]);
 
+  useEffect(() => {
+    if(channelId) {
+      joinChannelHandler(channelId);
+    }
+  }, [channelId]);
 
-  const updateApp = (newChannel) => {
+  const updateApp = useCallback((newChannel) => {
     if(newChannel.channel){
-      setData(newChannel.channel.data.attributes);
+      fetchCurrentChannelDataHandler(newChannel.channel.data.attributes);
     }
     if(newChannel.users){
-      setUsers(newChannel.users.data.map((u) => u.attributes));
+      fetchCurrentChannelUsersHandler(newChannel.users.data.map((u) => u.attributes));
     }
     if(newChannel.messages){
-      setMessages(newChannel.messages.data.map((m) => m.attributes));
+      fetchCurrentChannelMessagesHandler(newChannel.messages.data.map((m) => m.attributes));
     }
-
     if(!newChannel.scroll_down && bottomRef && bottomRef.current){
       bottomRef.current.scrollIntoView({ behavior: "smooth" });
-      console.log("scrollIntoView");
     }
-  };
+  }, [bottomRef]);
 
-  const sendMessageHandler = () => {
-    if(messageBody.trim().length == 0){
+  const sendMessageHandler = useCallback(() => {
+    if(inputRef.current.value.trim().length === 0){
       inputRef.current.focus();
       return false;
     }
     async function f () {
       await createMessage({
         variables: {
-          body: messageBody,
-          channel_id: parseInt(props.channelId),
+          body: inputRef.current.value,
+          channel_id: parseInt(channelId),
         },
       });
 
@@ -66,54 +89,38 @@ export default function Page(props){
       }
     }
     f();
-  };
+  }, [channelId, inputRef]);
 
-  const userById = (id) => {
-    if (users) {
-      const filteredChannel = users.filter((user) => user.id === id);
-      if(filteredChannel.length == 1) {
-        return filteredChannel[0];
+  const userById = useCallback((id) => {
+    if (current_channel_users && current_channel_users.length > 0) {
+      const filteredUser = current_channel_users.filter((user) => parseInt(user.id) === id);
+      if (filteredUser.length === 1) {
+        return filteredUser[0];
       }
     }
-
     return { id: 0, name: 'no name' };
-  };
-
-  const channelWebSocketParams = () => {
-    return { 
-      cableApp: props.cableApp, 
-      channelId: props.channelId,
-      updateApp
-    };
-  }
+  }, [current_channel_users]);
 
   const MessageMorePopup = ({ message }) => {
-    return (<Popup trigger={<SmallLinkButton>더보기</SmallLinkButton>} position="right center" nested>
+    return (<Popup trigger={<SmallLinkButton>More</SmallLinkButton>} position="right center" nested>
       <ListPopup>
-        {props?.loginUser?.id == message.user_id && <MessageEditPopup message={message} />}
-        {props?.loginUser?.id == message.user_id && <LinkDiv onClick={() => deleteMessageHandler(message.id)}>삭제하기</LinkDiv>}
-        <LinkDiv onClick={() => replyMessageHandler(message.id)}>댓글달기</LinkDiv>
-        {props?.loginUser?.id != message.user_id && <LinkDiv onClick={() => reportMessageHandler(message.id)}>신고하기</LinkDiv>}
+        {current_user?.id === message.user_id && <MessageEditPopup message={message} />}
+        {current_user?.id === message.user_id && <LinkDiv onClick={() => deleteMessageHandler(message.id)}>Delete</LinkDiv>}
+        <LinkDiv onClick={() => replyMessageHandler(message.id)}>Reply</LinkDiv>
       </ListPopup>
     </Popup>)
   };
 
-  const test = (e) => {
-    setEditMessage(e.target.value);
-    return false;
-  }
-
   const MessageEditPopup = ({ message }) => {
-    return (<Popup trigger={<LinkDiv>수정하기</LinkDiv>} nested modal onOpen={() => { editInputRef.current.focus(); }}>
+    return (<Popup trigger={<LinkDiv>Modify</LinkDiv>} nested modal onOpen={() => { editInputRef.current.focus(); }}>
       <ListPopup>
-        <MessageInput
-          onChange={test}
+        <TextArea
           defaultValue={message.body}
           ref={editInputRef}
           cols={70}
           rows={8}
         />
-        <SubmitButton onClick={() => { editMessageHandler(message.id) }}>수정하기</SubmitButton>
+        <SubmitButton onClick={() => { editMessageHandler(message.id) }}>Modify</SubmitButton>
       </ListPopup>
     </Popup>)
   };
@@ -122,15 +129,15 @@ export default function Page(props){
     return (
       <Message key={message.id}>
         <a name={message.id}></a>
-        {message.kind != 'system_message' && <div>
-          <small>[<LinkButton onClick={() => { replyMessageHandler(message.id)}}>{message.id}</LinkButton>]</small>
+        {message.kind !== 'system_message' && <div>
+          <small>[<LinkButton onClick={() => { replyMessageHandler(message.id)}}>{message.id}</LinkButton>] </small>
           <b>{userById(message.user_id).name}</b>&nbsp;
           <small>{message.send_at}</small>
           {!is_reply && <MessageMorePopup message={message}></MessageMorePopup>}
         </div>}
         <div>
-          {message.kind == 'system_message' && <b>{message.body}</b>}
-          {message.kind != 'system_message' && <ReactMarkdown source={message.body}></ReactMarkdown>}
+          {message.kind === 'system_message' && <b>{message.body}</b>}
+          {message.kind !== 'system_message' && <ReactMarkdown source={message.body}></ReactMarkdown>}
         </div>
         {message.reply_messages?.length > 0 && <ReplyPopup message={message} />}
       </Message>
@@ -138,7 +145,7 @@ export default function Page(props){
   }
 
   const ReplyPopup = ({message}) => {
-    return (<Popup trigger={<LinkButton><ReplyTitle> ↪︎ {message.reply_messages.length} 개의 댓글</ReplyTitle></LinkButton>} keepTooltipInside=".message-list">
+    return (<Popup trigger={<LinkButton> ↪︎<ReplyTitle> {message.reply_messages.length} Comment(s)</ReplyTitle></LinkButton>} keepTooltipInside=".message-list">
       <ListPopup>
         {message.reply_messages.map(reply_message => <MessageBox key={reply_message.id} message={reply_message} is_reply={true} />)}
       </ListPopup>
@@ -146,17 +153,16 @@ export default function Page(props){
   };
 
   const editMessageHandler = (message_id) => {
-    console.log(editMessage);
     updateMessage({
       variables: {
-        body: editMessage,
+        body: editInputRef.current.value,
         id: parseInt(message_id),
       },
     });
   }
 
   const deleteMessageHandler = (message_id) => {
-    if(window.confirm('정말 삭제할래요?')){
+    if(window.confirm('Are you sure?')){
       deleteMessage({
         variables: {
           id: parseInt(message_id),
@@ -165,12 +171,6 @@ export default function Page(props){
     }
   }
 
-  const reportMessageHandler = (message_id) => {
-    if(window.confirm('정말 신고할래요?')){
-      
-    }
-  }
-  
   const replyMessageHandler = (message_id) => {
     inputRef.current.value = `[#${message_id}](#${message_id})\n`;
     inputRef.current.focus();
@@ -179,25 +179,48 @@ export default function Page(props){
   return (
     <Chat>
       <WorkspaceChannelName>
-        { `${props.workspaceById(props.workspaceId).name}#${props.channelById(props.channelId).name}` }
+        { `${workspaceById(workspaceId).name}#${channelById(channelId).name}` }
       </WorkspaceChannelName> 
       <MessageList className="message-list">
-        {messages.map((message) => 
+        {current_channel_messages && current_channel_messages.length > 0 && current_channel_messages.map((message) => 
           <MessageBox key={message.id} message={message} />
         )}
-        <div ref={bottomRef}></div>
-        <ChannelWebSocket {...channelWebSocketParams()}/>
+        <div ref={bottomRef} ></div>
+        {<ChannelWebSocket cableApp={cableApp} channelId={channelId} updateApp={updateApp} />}
       </MessageList>
       <MessageInputArea>
-        <MessageInput
-          onChange={(e) => setMessageBody(e.target.value)}
+        <TextArea
           onKeyPress={(e) => { if (e.key === 'Enter' && e.shiftKey) { sendMessageHandler(); }else{return false;}
           }}
           ref={inputRef}
-          placeholder="shift + enter로 메세지 전송"
+          placeholder="Press shift + enter to send a message"
         />
-        <SubmitButton onClick={sendMessageHandler}>보내기</SubmitButton>
+        <SubmitButton onClick={sendMessageHandler}> >> </SubmitButton>
       </MessageInputArea>
     </Chat>
   );
 }
+
+
+function mapStateToProps({ cache: { cableApp, current_user, current_channel_users, current_channel_messages } }) {
+  return { cableApp, current_user, current_channel_users, current_channel_messages };
+}
+
+function dispatchToProps(dispatch) {
+  return {
+    setCurrentWorkspaceHandler: (workspace) => {
+      dispatch(setCurrentWorkspace(workspace));
+    },
+    fetchCurrentChannelDataHandler: (data) => {
+      dispatch(fetchCurrentChannelData(data));
+    },
+    fetchCurrentChannelUsersHandler: (users) => {
+      dispatch(fetchCurrentChannelUsers(users));
+    },
+    fetchCurrentChannelMessagesHandler: (messages) => {
+      dispatch(fetchCurrentChannelMessages(messages));
+    },
+  }
+}
+
+export default connect(mapStateToProps, dispatchToProps)(Page);

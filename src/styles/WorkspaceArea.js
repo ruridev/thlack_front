@@ -2,8 +2,8 @@ import styled from 'styled-components';
 
 const WorkspaceNavigator = styled.div`
   grid-area: workspace;
-  background-color: black;
-  color: white;
+  max-height: calc(50vh - 8px); 
+  border: 1px solid ${({ theme }) => theme.borderColor};
   overflow: hidden;
 
   :hover {
@@ -23,10 +23,10 @@ const WorkspaceButton = styled.div`
   padding: 8px;
   cursor: pointer;
   text-decoration: none;
-  color: white;
 
   :hover {
     text-decoration: underline;
+    background-color: ${({ theme }) => theme.hoverBackground};
   }
 `;
 

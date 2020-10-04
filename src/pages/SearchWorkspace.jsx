@@ -1,11 +1,16 @@
-import React, { useState, useRef } from 'react';
+import React, { useRef, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useMutation, useLazyQuery } from '@apollo/client';
 import { SEARCH_WORKSPACES, JOIN_WORKSPACE } from '../queries'
 import { InputTextBox, SubmitButton, LinkButton } from '../styles';
 import { Search, Title, WorkingArea } from '../styles/SearchWorkspace';
+import { setMode, setCurrentWorkspace } from '../action/cache';
+import { connect } from 'react-redux';
 
-export default function Page(props){
+const Page = ({ onClickWorkspaceLink }) => {
+  const history = useHistory();
+  const inputRef = useRef();
+
   const [searchWorkspaces, { data: searchWorkspacesData }] = useLazyQuery(
     SEARCH_WORKSPACES,
     {
@@ -16,41 +21,50 @@ export default function Page(props){
     JOIN_WORKSPACE,
     {
       onCompleted({ joinWorkspace: { workspace } }) {
-        history.push(`/workspaces/${workspace.id}`);
+        onClickWorkspaceLink(workspace)
       }
     }
   );
 
-  const [workspaceName, setWorkspaceName] = useState('');
-  const history = useHistory();
-  const inputRef = useRef();
-
-  const searchWorkspacesHandler = () => {
-    if(workspaceName.trim().length === 0){
+  const searchWorkspacesHandler = useCallback(() => {
+    if(inputRef.current.value.trim().length === 0){
       inputRef.current.focus();
       return false;
     }
-    searchWorkspaces({ variables: { name: workspaceName } })  
-  }
-  const joinWorkspaceHandler = (workspace_id) => {
-    joinWorkspace({ variables: { workspace_id: parseInt(workspace_id) } });
-  }
+    searchWorkspaces({ variables: { name: inputRef.current.value } })  
+  }, [inputRef]);
+
+  const joinWorkspaceHandler = useCallback((workspace_id) => {
+    joinWorkspace({variables: { workspace_id: parseInt(workspace_id) } });
+  }, []);
 
   return (
     <Search>
       <Title>
-        워크스페이스 찾기
+        Find Workspace
       </Title> 
       <WorkingArea>
-        <InputTextBox type="text" onChange={(e) => { setWorkspaceName(e.target.value)}} onKeyDown={(e) => { if(e.keyCode == 13) { searchWorkspacesHandler(workspaceName) } }}  placeholder="workspace name" ref={inputRef} ></InputTextBox>
-        <SubmitButton onClick={()=>searchWorkspacesHandler(workspaceName)}>검색</SubmitButton>
-        {searchWorkspacesData && searchWorkspacesData.searchWorkspaces.length == 0 && <div>Not Found T.T </div>}
+        <InputTextBox type="text" onKeyDown={(e) => { if(e.keyCode === 13) { searchWorkspacesHandler() } }}  placeholder="workspace name" ref={inputRef} ></InputTextBox>
+        <SubmitButton onClick={()=>searchWorkspacesHandler()}>Find</SubmitButton>
+        {searchWorkspacesData && searchWorkspacesData.searchWorkspaces.length === 0 && <div>404 Not found :p </div>}
         {searchWorkspacesData && searchWorkspacesData.searchWorkspaces.map((workspace) => 
           <div key={workspace.id}>
-            {workspace.name} &nbsp; <LinkButton onClick={() => {joinWorkspaceHandler(workspace.id)}}>참가하기</LinkButton>
+            {workspace.name} &nbsp; <LinkButton onClick={() => {joinWorkspaceHandler(workspace.id)}}>Join</LinkButton>
           </div>
         )}
       </WorkingArea>
     </Search>
   );
 }
+
+function dispatchToProps(dispatch, ownProps) {
+  return {
+    onClickWorkspaceLink: (workspace) => {
+      dispatch(setCurrentWorkspace(workspace));
+      dispatch(setMode('welcome'));
+      ownProps.history.push(`/workspaces/${workspace.id}`);
+    },
+  }
+}
+
+export default connect(null, dispatchToProps)(Page);

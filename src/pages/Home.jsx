@@ -1,20 +1,21 @@
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useMutation } from '@apollo/client';
+import { connect } from 'react-redux';
 import { auth, signInWithGoogle, signInWithGithub } from '../firebase/firebase.utils';
 import { CREATE_ACCOUNT } from '../queries'
-import { LinkButton } from '../styles';
+import { signOut, signIn } from '../action/account';
+import { setCurrentAccount, setToken, removeToken } from '../action/cache';
 import { Home, SignIn, SocialServiceButton } from '../styles/Home';
 
-export default function Page(props){
-  const { loginAccount, setLoginAccount, initFunction } = props;
+const Page = ({ signOutHandler, signInHandler, setTokenHandler, removeTokenHandler, setCurrentAccountHandler }) => {
   const [createAccount] = useMutation(
     CREATE_ACCOUNT,
     {
-      onCompleted({createAccount: { account }}) {
-        if(account){
-          history.push('/change_user');
-        }
+      onCompleted({ createAccount }) {
+        // Account 생성에 성공한 경우
+        setCurrentAccountHandler(createAccount.account);
+        history.push('/change_user');
       }
     });
 
@@ -23,35 +24,28 @@ export default function Page(props){
   useEffect(() => {
     let flag = true;
     if(flag) {
-      if(initFunction){
-        initFunction();
-        history.push('/');
-      } else {
-        auth.onAuthStateChanged((user) => {
-          if(loginAccount && !user) {
-            localStorage.setItem('kind', null)
-            localStorage.setItem('token', null)
-            setLoginAccount(null);
-            history.push('/');
-          }else if(!!(user?.email) && !loginAccount){
-            setLoginAccount(user);
-            user.getIdToken(true).then(function(idToken) {
-              localStorage.setItem('kind', 'account')
-              localStorage.setItem('token', idToken)
-              createAccount({
-                variables: {
-                  identifier: user.uid,
-                  providerId: user.providerData[0].providerId,
-                  displayName: user.displayName,
-                  email: user.email,
-                },
-              });
+      auth.onAuthStateChanged((firebaseAccount) => {
+        if(!firebaseAccount) {
+          removeTokenHandler();
+          signOutHandler();
+          history.push('/');
+        }else if(!!(firebaseAccount?.email)){
+          signInHandler(firebaseAccount)
+          firebaseAccount.getIdToken(true).then(function(idToken) {
+            setTokenHandler(idToken);
+            createAccount({
+              variables: {
+                identifier: firebaseAccount.uid,
+                providerId: firebaseAccount.providerData[0].providerId,
+                displayName: firebaseAccount.displayName,
+                email: firebaseAccount.email,
+              },
             });
-          }
-        });
-      }
+          });
+        }
+      });
     }
-  });
+  }, []);
 
   return(
     <Home>
@@ -79,3 +73,29 @@ export default function Page(props){
     </Home>
   )
 }
+
+function dispatchToProps(dispatch) {
+  return {
+    signInHandler: (account) => {
+      dispatch(signIn(account));
+    },
+    signOutHandler: () => {
+      dispatch(signOut());
+    },
+    setTokenHandler: (value) => {
+      dispatch(setToken({ kind: 'account', value }))
+      localStorage.setItem('kind', 'account')
+      localStorage.setItem('token', value)
+    },
+    removeTokenHandler: () => {
+      dispatch(removeToken())
+      localStorage.setItem('kind', null)
+      localStorage.setItem('token', null)
+    },
+    setCurrentAccountHandler: (account) => {
+      dispatch(setCurrentAccount(account));
+    }
+  }
+}
+
+export default connect(null, dispatchToProps)(Page);
