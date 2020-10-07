@@ -18,11 +18,22 @@ const GET_MY_WORKSPACES = gql`
 
 const GET_WORKSPACES = gql`
   query getWorkspaces {
-    workspaces {
-      id
+    workspaces{
+      id  
       name
       owners {
         id
+      }
+      channels{
+        id
+        name
+        owners {
+          id
+        }
+        workspace {
+          id
+          name
+        }
       }
     }
   }
@@ -327,7 +338,6 @@ const UPDATE_MESSAGE = gql`
 
 export {
   CREATE_MESSAGE, 
-  GET_MY_WORKSPACES,
   GET_WORKSPACE, 
   GET_WORKSPACE_WITH_CHANNELS,
   JOIN_CHANNEL, 

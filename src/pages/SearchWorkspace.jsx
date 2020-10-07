@@ -4,7 +4,7 @@ import { useMutation, useLazyQuery } from '@apollo/client';
 import { SEARCH_WORKSPACES, JOIN_WORKSPACE } from '../queries'
 import { InputTextBox, SubmitButton, LinkButton } from '../styles';
 import { Search, Title, WorkingArea } from '../styles/SearchWorkspace';
-import { setMode, setCurrentWorkspace } from '../action/cache';
+import { setCurrentWorkspace } from '../action/cache';
 import { connect } from 'react-redux';
 
 const Page = ({ onClickWorkspaceLink }) => {
@@ -61,7 +61,6 @@ function dispatchToProps(dispatch, ownProps) {
   return {
     onClickWorkspaceLink: (workspace) => {
       dispatch(setCurrentWorkspace(workspace));
-      dispatch(setMode('welcome'));
       ownProps.history.push(`/workspaces/${workspace.id}`);
     },
   }

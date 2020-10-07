@@ -1,5 +1,4 @@
-import actionCreator from '../action/index';
-const { FETCH_USERS } = actionCreator.user;
+import { FETCH_USERS } from './user.action';
 
 const user = (state = {}, action) => {
   switch (action.type) {

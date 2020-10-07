@@ -1,7 +1,8 @@
-import account from './account';
-import user from './user';
-import workspaces from './workspaces';
-import cache from './cache';
+import account from './account.reducer';
+import user from './user.reducer';
+import workspaces from './workspaces.reducer';
+import cache from './cache.reducer';
+import chat from './chat.reducer';
 import { combineReducers } from 'redux';
 
 export default combineReducers({
@@ -9,4 +10,5 @@ export default combineReducers({
   user,
   workspaces,
   cache,
+  chat,
 });

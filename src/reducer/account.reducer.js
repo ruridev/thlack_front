@@ -1,5 +1,4 @@
-import actionCreator from '../action/index';
-const { SIGN_IN, SIGN_OUT } = actionCreator.account;
+import { SIGN_IN, SIGN_OUT } from './account.action';
 
 const account = (state = [], action) => {
   switch (action.type) {

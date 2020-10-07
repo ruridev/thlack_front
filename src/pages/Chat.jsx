@@ -1,75 +1,64 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import ChannelWebSocket from '../cables/ChannelWebSocket';
 import { useMutation } from '@apollo/client';
 import { SubmitButton, SmallLinkButton, ListPopup, LinkDiv, LinkButton, TextArea } from '../styles';
 import { Chat, WorkspaceChannelName, MessageList,  Message,  MessageInputArea, ReplyTitle } from '../styles/Chat';
-import { CREATE_MESSAGE, DELETE_MESSAGE, UPDATE_MESSAGE, JOIN_CHANNEL } from '../queries'
+import { CREATE_MESSAGE, DELETE_MESSAGE, UPDATE_MESSAGE } from '../queries'
 import ReactMarkdown from 'react-markdown'
 import Popup from 'reactjs-popup';
-import { setCurrentWorkspace,  fetchCurrentChannelData, fetchCurrentChannelMessages, fetchCurrentChannelUsers } from '../action/cache';
 import { connect } from 'react-redux';
 
 const Page = ({
   cableApp,
   current_user,
-  current_channel_users,
-  current_channel_messages,
-  fetchCurrentChannelDataHandler,
-  fetchCurrentChannelUsersHandler,
-  fetchCurrentChannelMessagesHandler, 
-  channelById, 
-  workspaceById, 
-  setCurrentWorkspaceHandler,
+  currentChannel,
+  workspaces,
 }) => {
-  const [createMessage] = useMutation(CREATE_MESSAGE);
-  const [deleteMessage] = useMutation(DELETE_MESSAGE);
-  const [updateMessage] = useMutation(UPDATE_MESSAGE);
-  const [joinChannel] = useMutation(JOIN_CHANNEL, {
-    onCompleted({ joinChannel: { channel } }){
-      setCurrentWorkspaceHandler(channel.workspace);
-    }
-  });
-
-  const joinChannelHandler = useCallback((channel_id) => {
-    joinChannel({variables: { workspace_id: parseInt(workspaceId), channel_id: parseInt(channel_id) } });
+  console.log("😇 Chat.jsx rendering");
+  useEffect(() => {
+    console.log("😇 Chat.jsx useEffect");
   }, []);
+
+  const [channelUsers, setChannelUsers] = useState([]);
+  const [channelMessages, setChannelMessages] = useState([]);
 
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
   const editInputRef = useRef(null);
-  const [data, setData] = useState([]);
-  const [users, setUsers] = useState([]);
 
   const { workspaceId, channelId } = useParams();
+
+  const [createMessage] = useMutation(CREATE_MESSAGE);
+  const [deleteMessage] = useMutation(DELETE_MESSAGE);
+  const [updateMessage] = useMutation(UPDATE_MESSAGE);
 
   useEffect(() => {
     if (bottomRef && bottomRef.current) {
       bottomRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  },[]);
+  },[bottomRef]);
 
-  useEffect(() => {
-    if(channelId) {
-      joinChannelHandler(channelId);
-    }
-  }, [channelId]);
-
-  const updateApp = useCallback((newChannel) => {
-    if(newChannel.channel){
-      fetchCurrentChannelDataHandler(newChannel.channel.data.attributes);
-    }
+  const updateApp = (newChannel) => {
     if(newChannel.users){
-      fetchCurrentChannelUsersHandler(newChannel.users.data.map((u) => u.attributes));
+      setChannelUsers(newChannel.users.data.map((u) => u.attributes));
     }
     if(newChannel.messages){
-      fetchCurrentChannelMessagesHandler(newChannel.messages.data.map((m) => m.attributes));
+      setChannelMessages(newChannel.messages.data.map((m) => m.attributes));
     }
-    if(!newChannel.scroll_down && bottomRef && bottomRef.current){
+    if(!newChannel.scroll_down){
+      scrollDown();
+    }
+  };
+
+
+
+  const scrollDown = useCallback(() => {
+    if (bottomRef && bottomRef.current) {
       bottomRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [bottomRef]);
-
+  
   const sendMessageHandler = useCallback(() => {
     if(inputRef.current.value.trim().length === 0){
       inputRef.current.focus();
@@ -83,7 +72,7 @@ const Page = ({
         },
       });
 
-      if (bottomRef && bottomRef.current) {
+      if (inputRef && inputRef.current) {
         inputRef.current.value = '';
         inputRef.current.focus();
       }
@@ -92,26 +81,26 @@ const Page = ({
   }, [channelId, inputRef]);
 
   const userById = useCallback((id) => {
-    if (current_channel_users && current_channel_users.length > 0) {
-      const filteredUser = current_channel_users.filter((user) => parseInt(user.id) === id);
+    if (channelUsers && channelUsers.length > 0) {
+      const filteredUser = channelUsers.filter((user) => parseInt(user.id) === id);
       if (filteredUser.length === 1) {
         return filteredUser[0];
       }
     }
     return { id: 0, name: 'no name' };
-  }, [current_channel_users]);
+  }, [channelUsers]);
 
-  const MessageMorePopup = ({ message }) => {
+  const MessageMorePopup = useCallback(({ message }) => {
     return (<Popup trigger={<SmallLinkButton>More</SmallLinkButton>} position="right center" nested>
       <ListPopup>
         {current_user?.id === message.user_id && <MessageEditPopup message={message} />}
         {current_user?.id === message.user_id && <LinkDiv onClick={() => deleteMessageHandler(message.id)}>Delete</LinkDiv>}
-        <LinkDiv onClick={() => replyMessageHandler(message.id)}>Reply</LinkDiv>
+        <LinkDiv onClick={() => onClickReplyMessage(message.id)}>Reply</LinkDiv>
       </ListPopup>
     </Popup>)
-  };
+  }, []);
 
-  const MessageEditPopup = ({ message }) => {
+  const MessageEditPopup = useCallback(({ message }) => {
     return (<Popup trigger={<LinkDiv>Modify</LinkDiv>} nested modal onOpen={() => { editInputRef.current.focus(); }}>
       <ListPopup>
         <TextArea
@@ -123,14 +112,14 @@ const Page = ({
         <SubmitButton onClick={() => { editMessageHandler(message.id) }}>Modify</SubmitButton>
       </ListPopup>
     </Popup>)
-  };
+  }, [editInputRef]);
 
-  const MessageBox = ({ message, is_reply }) => {
+  const MessageBox = useCallback(({ message, is_reply }) => {
     return (
       <Message key={message.id}>
         <a name={message.id}></a>
         {message.kind !== 'system_message' && <div>
-          <small>[<LinkButton onClick={() => { replyMessageHandler(message.id)}}>{message.id}</LinkButton>] </small>
+          <small>[<LinkButton onClick={() => { onClickReplyMessage(message.id)}}>{message.id}</LinkButton>] </small>
           <b>{userById(message.user_id).name}</b>&nbsp;
           <small>{message.send_at}</small>
           {!is_reply && <MessageMorePopup message={message}></MessageMorePopup>}
@@ -142,26 +131,26 @@ const Page = ({
         {message.reply_messages?.length > 0 && <ReplyPopup message={message} />}
       </Message>
     );
-  }
+  }, [userById]);
 
-  const ReplyPopup = ({message}) => {
+  const ReplyPopup = useCallback(({message}) => {
     return (<Popup trigger={<LinkButton> ↪︎<ReplyTitle> {message.reply_messages.length} Comment(s)</ReplyTitle></LinkButton>} keepTooltipInside=".message-list">
       <ListPopup>
         {message.reply_messages.map(reply_message => <MessageBox key={reply_message.id} message={reply_message} is_reply={true} />)}
       </ListPopup>
     </Popup>)
-  };
+  }, []);
 
-  const editMessageHandler = (message_id) => {
+  const editMessageHandler = useCallback((message_id) => {
     updateMessage({
       variables: {
         body: editInputRef.current.value,
         id: parseInt(message_id),
       },
     });
-  }
+  }, [editInputRef]);
 
-  const deleteMessageHandler = (message_id) => {
+  const deleteMessageHandler = useCallback((message_id) => {
     if(window.confirm('Are you sure?')){
       deleteMessage({
         variables: {
@@ -169,20 +158,20 @@ const Page = ({
         },
       });
     }
-  }
+  }, []);
 
-  const replyMessageHandler = (message_id) => {
+  const onClickReplyMessage = useCallback((message_id) => {
     inputRef.current.value = `[#${message_id}](#${message_id})\n`;
     inputRef.current.focus();
-  }
+  }, [inputRef]);
 
   return (
     <Chat>
       <WorkspaceChannelName>
-        { `${workspaceById(workspaceId).name}#${channelById(channelId).name}` }
+        { `${currentChannel.workspace.name}#${currentChannel.name}` }
       </WorkspaceChannelName> 
       <MessageList className="message-list">
-        {current_channel_messages && current_channel_messages.length > 0 && current_channel_messages.map((message) => 
+        {channelMessages && channelMessages.length > 0 && channelMessages.map((message) => 
           <MessageBox key={message.id} message={message} />
         )}
         <div ref={bottomRef} ></div>
@@ -202,25 +191,8 @@ const Page = ({
 }
 
 
-function mapStateToProps({ cache: { cableApp, current_user, current_channel_users, current_channel_messages } }) {
-  return { cableApp, current_user, current_channel_users, current_channel_messages };
+function mapStateToProps({ cache: { current_user }, workspaces, chat: { cableApp } }) {
+  return { cableApp, current_user, workspaces };
 }
 
-function dispatchToProps(dispatch) {
-  return {
-    setCurrentWorkspaceHandler: (workspace) => {
-      dispatch(setCurrentWorkspace(workspace));
-    },
-    fetchCurrentChannelDataHandler: (data) => {
-      dispatch(fetchCurrentChannelData(data));
-    },
-    fetchCurrentChannelUsersHandler: (users) => {
-      dispatch(fetchCurrentChannelUsers(users));
-    },
-    fetchCurrentChannelMessagesHandler: (messages) => {
-      dispatch(fetchCurrentChannelMessages(messages));
-    },
-  }
-}
-
-export default connect(mapStateToProps, dispatchToProps)(Page);
+export default connect(mapStateToProps, null)(Page);

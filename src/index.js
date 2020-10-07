@@ -31,18 +31,19 @@ const client = new ApolloClient({
   cache: new InMemoryCache()
 });
 
-const store = configureStore(reducer, {});
 
 const CableApp = {}
 CableApp.cable = actionCable.createConsumer((process.env.REACT_APP_THLACK_ENV === 'production' ? 
                                               'wss://thlack.herokuapp.com/cable' :
                                               'ws://localhost:3001/cable'))
 
+const store = configureStore(reducer, { chat: { cableApp: CableApp } });
+
 const render = () => {
   ReactDOM.render(
     <Provider store={store}>
       <ApolloProvider client={client}>
-        <App cableApp={CableApp} />
+        <App />
       </ApolloProvider>
     </Provider>,
     document.getElementById('root')

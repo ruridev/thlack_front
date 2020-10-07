@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import { auth, signInWithGoogle, signInWithGithub } from '../firebase/firebase.utils';
 import { CREATE_ACCOUNT } from '../queries'
 import { signOut, signIn } from '../action/account';
-import { setCurrentAccount, setToken, removeToken } from '../action/cache';
+import { setCurrentAccount } from '../action/cache';
 import { Home, SignIn, SocialServiceButton } from '../styles/Home';
 
 const Page = ({ signOutHandler, signInHandler, setTokenHandler, removeTokenHandler, setCurrentAccountHandler }) => {
@@ -83,12 +83,10 @@ function dispatchToProps(dispatch) {
       dispatch(signOut());
     },
     setTokenHandler: (value) => {
-      dispatch(setToken({ kind: 'account', value }))
       localStorage.setItem('kind', 'account')
       localStorage.setItem('token', value)
     },
     removeTokenHandler: () => {
-      dispatch(removeToken())
       localStorage.setItem('kind', null)
       localStorage.setItem('token', null)
     },

@@ -72,8 +72,6 @@ function dispatchToProps(dispatch) {
   return {
     setCurrentUserHandler: (user) => {
       dispatch(setCurrentUser(user));
-      dispatch(setToken({ kind: 'user', value: user.token }))
-      console.log("⭐️⭐️⭐️⭐️⭐️⭐️⭐️", user)
       localStorage.setItem('kind', 'user')
       localStorage.setItem('token', user.token)
     },

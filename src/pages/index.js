@@ -10,6 +10,7 @@ import Chat from './Chat';
 import NewWorkspace from './NewWorkspace';
 import SearchWorkspace from './SearchWorkspace';
 import RefreshData from './RefreshData';
+import WorkspaceChannelPannel from './WorkspaceChannelPannel';
 
 export {
   HomePage,
@@ -24,4 +25,5 @@ export {
   Chat,
   SearchWorkspace,
   RefreshData,
+  WorkspaceChannelPannel,
 };

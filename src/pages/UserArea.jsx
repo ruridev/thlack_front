@@ -1,12 +1,16 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { LoginUserNavigator, LoginUserButton, ChangeUserButton, LogoutButton } from '../styles/UserArea';
 import { connect } from 'react-redux';
 import { setTheme } from '../action/cache';
 
-const Page = ({ theme, current_user, onClickChangeUser, onClickSignOut, setThemeHandler }) => {
-  const themeToggler = () => {
+const Page = ({ theme, current_user, history, onClickSignOut, setThemeHandler }) => {
+  const themeToggler = useCallback(() => {
     setThemeHandler(theme === 'light' ? 'dark' : 'light');
-  }
+  }, [theme]);
+
+  const onClickChangeUser = useCallback(() => {
+    history.push('/change_user');
+  }, []);
 
   return (
     <LoginUserNavigator>
@@ -14,16 +18,12 @@ const Page = ({ theme, current_user, onClickChangeUser, onClickSignOut, setTheme
         {/*<LoginUserImage>
           <img src={cache && cache['current_user'] && cache['current_user'].photoURL} alt="img" width='30'></img>
         </LoginUserImage>*/}
-        { current_user ? 
           <div>
-            <center>{current_user.name}</center>
+            <center>{current_user?.name}</center>
             <ChangeUserButton onClick={onClickChangeUser}>
               Change user
             </ChangeUserButton>
-          </div> : 
-          <ChangeUserButton onClick={onClickChangeUser}>
-            No user
-        </ChangeUserButton> }
+          </div>
         <button onClick={themeToggler}>Switch Theme</button>
       </LoginUserButton>
       <LogoutButton onClick={onClickSignOut}>Sign out</LogoutButton>
@@ -31,16 +31,13 @@ const Page = ({ theme, current_user, onClickChangeUser, onClickSignOut, setTheme
   );
 }
 
-function mapStateToProps({ cache }) {
-  const theme = cache.theme || localStorage.getItem('theme') || 'dark';
-  return { current_user: cache.current_user, theme };
+function mapStateToProps({ cache: { current_user, theme } }) {
+  const currentTheme = theme || localStorage.getItem('theme') || 'dark';
+  return { current_user, theme: currentTheme };
 }
 
-function dispatchToProps(dispatch, ownProps) {
+function dispatchToProps(dispatch) {
   return {
-    onClickChangeUser: () => {
-      ownProps.history.push('/change_user');
-    },
     onClickSignOut: () => {
       // todo
     },

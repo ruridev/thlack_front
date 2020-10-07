@@ -5,18 +5,16 @@ import { CREATE_CHANNEL, JOIN_CHANNEL } from '../queries'
 import { LinkButton, InputTextBox, SubmitButton } from '../styles/';
 import { Main, WorkingArea } from '../styles/NewChannel';
 import { addChannel } from '../action/workspace';
-import { setMode } from '../action/cache';
 import { connect } from 'react-redux';
 
 
-const Page = ({ current_workspace, addChannelHandler, setModeHandler }) => {
+const Page = ({ current_workspace, addChannelHandler }) => {
   const inputRef = useRef();
   const { workspaceId } = useParams();
   const history = useHistory();
 
   const [joinChannel] = useMutation(JOIN_CHANNEL, {
     onCompleted({ joinChannel: { channel } }){
-      setModeHandler('chat');
       history.push(`/workspaces/${workspaceId}/${channel.id}`);
     }
   });
@@ -24,7 +22,6 @@ const Page = ({ current_workspace, addChannelHandler, setModeHandler }) => {
   const [createChannel] = useMutation(CREATE_CHANNEL, {
     onCompleted({createChannel: { channel }}){
       addChannelHandler(workspaceId, channel)
-      setModeHandler('chat');
       history.push(`/workspaces/${workspaceId}/${channel.id}`);
     }
   });
@@ -67,9 +64,6 @@ function dispatchToProps(dispatch, ownProps) {
   return {
     addChannelHandler: (workspace_id, channel) => {
       dispatch(addChannel(workspace_id, channel));
-    },
-    setModeHandler: (mode) => {
-      dispatch(setMode(mode));
     }
   }
 }

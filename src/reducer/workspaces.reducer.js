@@ -1,10 +1,9 @@
-import actionCreator from '../action/index';
-const {
+import {
   FETCH_WORKSPACES,
   ADD_WORKSPACE,
   FETCH_CHANNELS,
   ADD_CHANNEL,
-} = actionCreator.workspace;
+} from './workspace.action';
 
 const workspace = (state = [], action) => {
   let newState = null;
