@@ -1,10 +1,9 @@
 import React, {  useCallback } from 'react';
 import {  useHistory, useParams } from 'react-router-dom';
-import { WorkspaceNavigator, SearchWorkspace, NewWorkspace } from '../../styles/WorkspaceArea';
-import WorkspaceItemList from '../presenters/workspace_area/WorkspaceItemList'
 import { connect } from 'react-redux';
-const Container = ({ workspaces }) => {
+import WorkspaceArea from '../presenters/workspace_area/WorkspaceArea'
 
+const Container = ({ workspaces }) => {
   const history = useHistory();
   const { workspaceId } = useParams();
 
@@ -21,11 +20,13 @@ const Container = ({ workspaces }) => {
   }, []);
 
   return (
-    <WorkspaceNavigator>
-      <SearchWorkspace onClick={onClickSearchWorkspace}>Search</SearchWorkspace>
-      <NewWorkspace onClick={onClickNewWorkspace }>+New Workspace</NewWorkspace>
-      <WorkspaceItemList workspaces={workspaces} selectedWorkspaceId={workspaceId} onClickWorkspaceLink={onClickWorkspaceLink} />
-    </WorkspaceNavigator>
+    <WorkspaceArea 
+      onClickSearchWorkspace={onClickSearchWorkspace}
+      onClickNewWorkspace={onClickNewWorkspace}
+      workspaces={workspaces}
+      selectedWorkspaceId={workspaceId}
+      onClickWorkspaceLink={onClickWorkspaceLink}
+    />
   );
 }
 

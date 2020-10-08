@@ -1,21 +1,20 @@
-import React, { useState, useRef, useMemo, useEffect } from 'react';
-import { Link, useHistory, useParams } from 'react-router-dom';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import { Route, Switch } from 'react-router-dom';
 import { Main, Left, Center, Right } from '../styles/Workspace';
-import { FriendArea } from './';
-import Chat from '../components/containers/Chat'
 import { connect } from 'react-redux';
 import { JOIN_CHANNEL, GET_WORKSPACES } from '../queries';
 import { useLazyQuery, useMutation } from '@apollo/client';
 import { fetchWorkspaces } from '../reducer/workspace.action';
+import Chat from '../components/containers/Chat'
 import WorkspaceChannelPannel from '../components/containers/WorkspaceChannelPannel'
 import UserArea from '../components/containers/UserArea';
-import NewWorkspacePage from './NewWorkspacePage'
-import NewChannelPage from './NewChannelPage'
-import SearchWorkspacePage from './SearchWorkspacePage'
+import FriendArea from '../components/containers/FriendArea';
+import NewWorkspace from '../components/containers/NewWorkspace'
+import NewChannel from '../components/containers/NewChannel'
+import SearchWorkspacePage from '../components/containers/SearchWorkspacePage'
 
 const Page = ({ current_user, workspaces, fetchWorkspacesHandler }) => {
-  const history = useHistory();
   const { workspaceId, channelId } = useParams();
   const [mode, setMode] = useState('chat');
   
@@ -24,13 +23,28 @@ const Page = ({ current_user, workspaces, fetchWorkspacesHandler }) => {
       setMode('chat');
     }
   });
+  const [getWorkspaces] = useLazyQuery(GET_WORKSPACES, {
+    fetchPolicy: `network-only`,
+    onCompleted(data){
+      fetchWorkspacesHandler(data.workspaces);
+    }
+  });
+
+  const currentWorkspace = useMemo(() => {
+    if(workspaces && workspaceId) {
+      const workspace = workspaces.filter(workspace => workspace.id === workspaceId)[0];
+
+      if(workspace){
+        return workspace;
+      }
+    }
+    return { id: 0, name: '?', channels: [], owners: [] };
+  }, [workspaces, workspaceId]);
 
   useEffect(() => {
     let flag = true;
-    if(flag){
-      if(current_user){
-        getWorkspaces();
-      }
+    if(flag && current_user){
+      getWorkspaces();
     }
     return function() {
       flag = false;
@@ -39,46 +53,23 @@ const Page = ({ current_user, workspaces, fetchWorkspacesHandler }) => {
 
   useEffect(() => {
     let flag = true;
-    if(flag) {
-      if(workspaceId && channelId && channelId !== "new") {
-        joinChannel({variables: { workspace_id: parseInt(workspaceId), channel_id: parseInt(channelId) } });
-      }
+    if(flag && workspaceId && channelId && channelId !== "new") {
+      joinChannel({
+        variables: {
+          workspace_id: parseInt(workspaceId),
+          channel_id: parseInt(channelId)
+        }
+      });
     }
     return function(){
       flag = false;
     }
   }, [workspaceId, channelId]);
 
-  const workspaceById = (id) => {
-    console.log('getWorkspace id: ', id);
-
-    if (workspaceId && workspaces) {
-      const workspace = workspaces.filter((workspace) => workspace.id === id);
-      if(workspace.length > 0){
-        return workspace[0];
-      }
-    }
-
-    return { name: '?' };
-  }
-
-  const channelById = (id) => {
-    if (channelId && workspaces) {
-      return workspaceById(workspaceId).channels.filter((channel) => channel.id === id)[0] || { name: '?' };
-    }else {
-      return { name: '?' };
-    }
-  };
-
-  const rightRef = useRef();
-  const centerRef = useRef();
-
-  //--------------------------- PARAMS -------------------------//
-
   const Welcome = () => {
     return (
       <div style={{padding: '8px'}}>
-        <h1>{workspaceById(workspaceId).name}</h1>
+        <h1>{currentWorkspace.name}</h1>
         <pre>
 {`
 ───▄▀▀▀▄▄▄▄▄▄▄▀▀▀▄───
@@ -127,59 +118,24 @@ const Page = ({ current_user, workspaces, fetchWorkspacesHandler }) => {
   ┃┃╱┃┃╭━╮┃┃╱╱┃┃╱╱╱╱┃┃╱╱┃┃╱┃┃╭━╮┃╰━╯┃┃┃╰┳┫┣┫┃╱┃┃┃╰┻━┃╭╮
   ╰╯╱╰┻╯╱╰┻╯╱╱╰╯╱╱╱╱╰╯╱╱╰╯╱╰┻╯╱╰┻━━━┻╯╰━┻━━┻╯╱╰━┻━━━╯╰╯
   `;
-  const currentWorkspace = useMemo(() => {
-    if(workspaces && workspaceId) {
-      const workspace = workspaces.filter(workspace => workspace.id === workspaceId)[0];
-
-      if(workspace){
-        return workspace;
-      }
-    }
-    return { id: 0, name: '?', channels: [], owners: [] };
-  }, [workspaces, workspaceId]);
-
-  const currentChannel = useMemo(() => {
-    if(currentWorkspace && channelId && channelId !== "new") {
-      const channel = currentWorkspace.channels.filter(channel => channel.id === channelId)[0];
-
-      if(channel){
-        return channel;
-      }
-    }
-    return { id: 0, name: '?', owners: [], workspace: { name: '?' } };
-  }, [currentWorkspace, channelId]);
-  
-
-  const [getWorkspaces] = useLazyQuery(GET_WORKSPACES, {
-    fetchPolicy: `network-only`,
-    onCompleted(data){
-      fetchWorkspacesHandler(data.workspaces);
-    }
-  });
-
-  const isWorkspaceOwner = useMemo(() => {
-    if(current_user && currentWorkspace){
-      return currentWorkspace.owners.filter(owner => owner.id === current_user.id).length > 0;
-    }
-  }, [current_user, currentWorkspace]);
 
   return (
     <Main>
       <Left>
-        <WorkspaceChannelPannel history={history} currentWorkspace={currentWorkspace} workspaces={workspaces} currentWorkspaceId={workspaceId} currentChannelId={channelId} isWorkspaceOwner={isWorkspaceOwner} />
+        <WorkspaceChannelPannel />
       </Left>
-      <Center ref={centerRef}>
+      <Center>
         <Switch>
           <Route path="/workspaces" component={() => <SearchWorkspacePage /> } exact />
-          <Route path="/workspaces/new" component={NewWorkspacePage} exact />
+          <Route path="/workspaces/new" component={NewWorkspace} exact />
           <Route path="/workspaces/:workspaceId" component={Welcome} exact />
-          <Route path="/workspaces/:workspaceId/new" component={NewChannelPage} exact />
+          <Route path="/workspaces/:workspaceId/new" component={NewChannel} exact />
           <Route path="/workspaces/:workspaceId/:channelId" component={Chat} exact />
         </Switch>
         { workspaceId && mode === 'workspace_management' ? <Chat /> : null}
         { workspaceId && channelId && mode === 'channel_management' ? <Chat /> : null}
       </Center>
-      <Right ref={rightRef}>
+      <Right>
         <UserArea />
         <FriendArea />
       </Right>

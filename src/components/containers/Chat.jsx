@@ -1,14 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { useMutation } from '@apollo/client';
-import { Chat, WorkspaceChannelName  } from '../../styles/Chat';
-import { CREATE_MESSAGE, DELETE_MESSAGE, UPDATE_MESSAGE } from '../../queries'
 import { connect } from 'react-redux';
-
-
-
-import MessageItemList from '../presenters/chat/MessageItemList';
-import MessageInput from '../presenters/chat/MessageInput';
+import { useMutation } from '@apollo/client';
+import { CREATE_MESSAGE, DELETE_MESSAGE, UPDATE_MESSAGE } from '../../queries'
+import Chat from '../presenters/chat/Chat';
 
 const Page = ({
   cableApp,
@@ -139,23 +134,20 @@ const Page = ({
   }, [inputRef]);
 
   return (
-    <Chat>
-      <WorkspaceChannelName>
-        { `${currentChannel.workspace.name}#${currentChannel.name}` }
-      </WorkspaceChannelName> 
-      <MessageItemList 
-        cableApp={cableApp}
-        updateApp={updateApp}
-        channelId={channelId}
-        messages={channelMessages}
-        bottomRef={bottomRef}
-        onClickReplyMessage={onClickReplyMessage}
-        deleteMessageHandler={deleteMessageHandler} 
-        editInputRef={editInputRef}
-        editMessageHandler={editMessageHandler}
-        current_user={current_user} />
-      <MessageInput sendMessageHandler={sendMessageHandler} inputRef={inputRef} />
-    </Chat>
+    <Chat 
+      currentChannel={currentChannel}
+      cableApp={cableApp}
+      updateApp={updateApp}
+      channelId={channelId}
+      messages={channelMessages}
+      bottomRef={bottomRef}
+      onClickReplyMessage={onClickReplyMessage}
+      deleteMessageHandler={deleteMessageHandler} 
+      editInputRef={editInputRef}
+      editMessageHandler={editMessageHandler}
+      current_user={current_user}
+      sendMessageHandler={sendMessageHandler}
+      inputRef={inputRef} />
   );
 }
 

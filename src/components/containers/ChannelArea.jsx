@@ -1,8 +1,7 @@
 import React, { useCallback, useMemo } from 'react';
-import { ChannelNavigator, NewChannel, ChannelButton } from '../../styles/ChannelArea';
-import ChannelItemList from '../presenters/channel_area/ChannelItemList';
 import { useHistory, useParams } from 'react-router-dom';
 import { connect } from 'react-redux';
+import ChannelArea from '../presenters/workspace_area/ChannelArea';
 
 const Container = ({ user, workspaces }) => {
   const history = useHistory();
@@ -41,14 +40,12 @@ const Container = ({ user, workspaces }) => {
   }, [workspace])
 
   return (
-    <ChannelNavigator>
-      { isOwner &&
-      <NewChannel onClick={onClickNewChannel} >+New Channel</NewChannel> }
-      <ChannelItemList
-        channels={channels}
-        selectedChannelId={channelId}
-        onClickJoinChannel={onClickJoinChannel} />
-    </ChannelNavigator>
+    <ChannelArea 
+      isOwner={isOwner}
+      onClickNewChannel={onClickNewChannel}
+      channels={channels}
+      selectedChannelId={channelId}
+      onClickJoinChannel={onClickJoinChannel} />
   );
 }
 

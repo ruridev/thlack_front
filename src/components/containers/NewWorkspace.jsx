@@ -1,13 +1,13 @@
 import React, { useCallback, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
+import { connect } from 'react-redux';
 import { useMutation } from '@apollo/client';
 import { CREATE_WORKSPACE } from '../../queries';
 import { setCurrentWorkspace } from '../../reducer/cache.action'
 import { addWorkspace } from '../../reducer/workspace.action'
-import { connect } from 'react-redux';
 import NewWorkspace from '../presenters/new_workspace/NewWorkspace';
 
-const Container = ({ dispatchCreateWorkspace, }) => {
+const Container = ({ dispatchCreateWorkspace }) => {
   const inputRef = useRef();
   const history = useHistory();
 
@@ -19,23 +19,25 @@ const Container = ({ dispatchCreateWorkspace, }) => {
   });
 
   const createWorkspaceHandler = useCallback(() => {
-    if(inputRef.current.value.trim().length === 0){
-      inputRef.current.focus();
-      return false;
+    if(inputRef && inputRef.current) {
+      if(inputRef.current.value.trim().length === 0){
+        inputRef.current.focus();
+        return false;
+      }
+
+      createWorkspace({
+        variables: {
+          name: inputRef.current.value,
+        },
+      });
     }
+  }, [inputRef, createWorkspace]);
 
-    createWorkspace({
-      variables: {
-        name: inputRef.current.value,
-      },
-    });
-  }, [inputRef]);
-
-  return (<>
+  return (
     <NewWorkspace
       createWorkspaceHandler={createWorkspaceHandler}
       inputRef={inputRef} />
-  </>);
+  );
 }
 
 function dispatchToProps(dispatch) {

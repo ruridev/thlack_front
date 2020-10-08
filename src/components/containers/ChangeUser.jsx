@@ -1,13 +1,11 @@
 import React, { useRef, useCallback } from 'react';
-import SelectUser from '../presenters/change_user/SelectUser'
-import NewUser from '../presenters/change_user/NewUser'
-import { Main, WorkingArea } from '../../styles/ChangeUser';
+import { useHistory } from 'react-router-dom';
+import { connect } from 'react-redux';
+import { useLazyQuery, useMutation } from '@apollo/client';
 import { GET_LOGIN_USER, CREATE_USER } from '../../queries';
 import { setCurrentUser } from '../../reducer/cache.action';
 import { fetchWorkspaces } from '../../reducer/workspace.action';
-import { connect } from 'react-redux';
-import { useHistory } from 'react-router-dom';
-import { useLazyQuery, useMutation } from '@apollo/client';
+import ChangeUser from '../presenters/change_user/ChangeUser'
 
 const Container = ({ users, setCurrentUserHandler, fetchWorkspacesHandler }) => {
   const history = useHistory();
@@ -51,14 +49,11 @@ const Container = ({ users, setCurrentUserHandler, fetchWorkspacesHandler }) => 
   }, []);
 
   return (
-    <Main>
-      <WorkingArea>
-        <h2>Select user</h2>
-        <SelectUser users={users} getLoginUserHandler={getLoginUserHandler} />
-        <p>------- or -------</p>
-        <NewUser createUserHandler={createUserHandler} inputRef={inputRef} />
-      </WorkingArea>
-    </Main>
+    <ChangeUser 
+      users={users}
+      getLoginUserHandler={getLoginUserHandler}
+      createUserHandler={createUserHandler}
+      inputRef={inputRef} />
   );
 }
 

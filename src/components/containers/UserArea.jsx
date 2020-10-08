@@ -1,9 +1,12 @@
 import React, { useCallback } from 'react';
+import { useHistory } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { setTheme } from '../../reducer/cache.action';
 import LoginUser from '../presenters/user/LoginUser';
 
-const Container = ({ theme, current_user, history, onClickSignOut, setThemeHandler }) => {
+const Container = ({ theme, current_user, onClickSignOut, setThemeHandler }) => {
+  const history = useHistory();
+
   const themeToggler = useCallback(() => {
     setThemeHandler(theme === 'light' ? 'dark' : 'light');
   }, [theme]);

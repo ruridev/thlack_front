@@ -78,7 +78,6 @@ const TextArea = styled.textarea`
 
 
 const AlignCenterWrapper = styled.div`
-  height: 100vh;
   display: grid;
   grid-template-areas: 
     ". . . ."

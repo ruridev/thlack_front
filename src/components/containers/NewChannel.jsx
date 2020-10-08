@@ -1,12 +1,12 @@
-import React, { useRef, useCallback } from 'react';
+import React, { useRef, useCallback, useMemo } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import { useMutation } from '@apollo/client';
-import { CREATE_CHANNEL, JOIN_CHANNEL } from '../../queries'
-import { addChannel } from '../../reducer/workspace.action';
 import { connect } from 'react-redux';
+import { isReference, useMutation } from '@apollo/client';
+import { CREATE_CHANNEL } from '../../queries'
+import { addChannel } from '../../reducer/workspace.action';
 import NewChannel from '../presenters/new_channel/NewChannel';
 
-const Container = ({ addChannelHandler }) => {
+const Container = ({ workspaces, addChannelHandler }) => {
   const inputRef = useRef();
   const { workspaceId } = useParams();
   const history = useHistory();
@@ -19,25 +19,42 @@ const Container = ({ addChannelHandler }) => {
   });
 
   const createChannelHandler = useCallback(() => {
-    if(inputRef.current.value.trim().length === 0){
-      inputRef.current.focus();
-      return false;
+    if(inputRef && inputRef.current){
+      if(inputRef.current.value.trim().length === 0){
+        inputRef.current.focus();
+        return false;
+      }
+
+      createChannel({
+        variables: {
+          name: inputRef.current.value,
+          workspace_id: parseInt(workspaceId)
+        },
+      });
     }
+  }, [inputRef, createChannel]);
 
-    createChannel({
-      variables: {
-        name: inputRef.current.value,
-        workspace_id: parseInt(workspaceId)
-      },
-    });
-  }, [inputRef, workspaceId]);
+  const currentWorkspace = useMemo(() => {
+    if(workspaces && workspaceId) {
+      const workspace = workspaces.filter(workspace => workspace.id === workspaceId)[0];
 
+      if(workspace){
+        return workspace;
+      }
+    }
+    return { id: 0, name: '?', channels: [], owners: [] };
+  }, [workspaces, workspaceId]);
 
   return (
     <NewChannel 
+      currentWorkspaceName={currentWorkspace?.name}
       createChannelHandler={createChannelHandler}
       inputRef={inputRef} />
   );
+}
+
+function mapStateToProps({ workspaces }) {
+  return { workspaces };
 }
 
 function dispatchToProps(dispatch, ownProps) {
@@ -48,4 +65,4 @@ function dispatchToProps(dispatch, ownProps) {
   }
 }
 
-export default connect(null, dispatchToProps)(Container);
+export default connect(mapStateToProps, dispatchToProps)(Container);

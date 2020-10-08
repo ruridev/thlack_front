@@ -1,11 +1,21 @@
 import React from 'react';
-import { InputTextBox, SubmitButton } from '../../../styles';
+import { AlignCenterWrapper, AlignCenter } from '../../../styles';
+import NewWorkspaceInput from './NewWorkspaceInput';
 
 const Presenter = ({ createWorkspaceHandler, inputRef }) => {
-  return (<>
-    <InputTextBox type="text" placeholder="Team Thlack" ref={inputRef}></InputTextBox>
-    <SubmitButton onClick={createWorkspaceHandler}>Create</SubmitButton>
-  </>);
+  return (
+    <AlignCenterWrapper>
+      <AlignCenter>
+        <div>
+          <h2>Create Workspace</h2>
+          <NewWorkspaceInput
+            createWorkspaceHandler={createWorkspaceHandler}
+            inputRef={inputRef}
+            />
+        </div>
+      </AlignCenter>
+    </AlignCenterWrapper>
+  );
 }
 
 export default React.memo(Presenter);

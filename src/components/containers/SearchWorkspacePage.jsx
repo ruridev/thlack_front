@@ -1,11 +1,11 @@
 import React, { useRef, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useMutation, useLazyQuery } from '@apollo/client';
-import { SEARCH_WORKSPACES, JOIN_WORKSPACE } from '../queries'
-import { AlignCenterWrapper, AlignCenter } from '../styles';
-import { setCurrentWorkspace } from '../reducer/cache.action';
+import { SEARCH_WORKSPACES, JOIN_WORKSPACE } from '../../queries'
+import { AlignCenterWrapper, AlignCenter } from '../../styles';
+import { setCurrentWorkspace } from '../../reducer/cache.action';
 import { connect } from 'react-redux';
-import SearchWorkspace from '../components/containers/SearchWorkspace';
+import SearchWorkspace from './SearchWorkspace';
 
 const Page = ({ onClickWorkspaceLink }) => {
   const history = useHistory();

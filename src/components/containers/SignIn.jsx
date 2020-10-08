@@ -1,13 +1,12 @@
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { useMutation } from '@apollo/client';
 import { connect } from 'react-redux';
+import { useMutation } from '@apollo/client';
 import { auth, signInWithGoogle, signInWithGithub } from '../../firebase/firebase.utils';
 import { CREATE_ACCOUNT } from '../../queries'
 import { signOut, signIn } from '../../reducer/account.action';
 import { setCurrentAccount } from '../../reducer/cache.action';
-import SocialLogin from '../presenters/home/SocialLogin';
-import { SignIn } from '../../styles/Home'
+import SignIn from '../presenters/home/SignIn';
 
 const Page = ({ signOutHandler, signInHandler, setTokenHandler, removeTokenHandler, setCurrentAccountHandler }) => {
   const history = useHistory();
@@ -49,17 +48,9 @@ const Page = ({ signOutHandler, signInHandler, setTokenHandler, removeTokenHandl
   }, []);
 
   return(
-    <SignIn>
-      <div>
-        <h1>Thlack</h1>
-      </div> 
-      <hr />
-      <p>
-        <SocialLogin
-          signInWithGoogle={signInWithGoogle}
-          signInWithGithub={signInWithGithub} />
-      </p>
-    </SignIn>
+    <SignIn
+      signInWithGoogle={signInWithGoogle}
+      signInWithGithub={signInWithGithub} />
   )
 }
 

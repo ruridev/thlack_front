@@ -1,12 +1,19 @@
 import React from 'react';
-import { InputTextBox, SubmitButton } from '../../../styles/';
+import { AlignCenterWrapper, AlignCenter } from '../../../styles';
+import NewChannelInput from './NewChannelInput';
 
-
-const Presenter = ({ createChannelHandler, inputRef }) => {
-  return (<>
-    <InputTextBox type="text" placeholder="general" ref={inputRef}></InputTextBox>
-    <SubmitButton onClick={createChannelHandler}>Create</SubmitButton>
-  </>);
+const Presenter = ({ currentWorkspaceName, createChannelHandler, inputRef }) => {
+  return (
+    <AlignCenterWrapper>
+      <AlignCenter>
+        <div>
+          <h2>Create a channel in ”{currentWorkspaceName}”</h2>
+          <NewChannelInput 
+            createChannelHandler={createChannelHandler}
+            inputRef={inputRef} />
+        </div>
+      </AlignCenter>
+    </AlignCenterWrapper>);
 }
 
-export default Presenter;
+export default React.memo(Presenter);

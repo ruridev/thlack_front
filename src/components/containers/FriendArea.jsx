@@ -1,5 +1,5 @@
 import React from 'react';
-import { FriendsNavigator } from '../styles/FriendArea';
+import { FriendsNavigator } from '../../styles/FriendArea';
 
 export default function Page(){
   return (
