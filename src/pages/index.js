@@ -5,7 +5,7 @@ import Workspace from './Workspace';
 import UserArea from './UserArea';
 import FriendArea from './FriendArea';
 import NewWorkspacePage from './NewWorkspacePage';
-import SearchWorkspace from './SearchWorkspace';
+import SearchWorkspacePage from './SearchWorkspacePage';
 import RefreshData from './RefreshData';
 
 export {
@@ -16,6 +16,6 @@ export {
   Workspace, 
   UserArea,
   FriendArea,
-  SearchWorkspace,
+  SearchWorkspacePage,
   RefreshData,
 };

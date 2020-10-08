@@ -6,6 +6,7 @@ import { InputTextBox, SubmitButton, LinkButton } from '../styles';
 import { Search, Title, WorkingArea } from '../styles/SearchWorkspace';
 import { setCurrentWorkspace } from '../reducer/cache.action';
 import { connect } from 'react-redux';
+import SearchWorkspace from '../components/containers/SearchWorkspace';
 
 const Page = ({ onClickWorkspaceLink }) => {
   const history = useHistory();
@@ -44,14 +45,7 @@ const Page = ({ onClickWorkspaceLink }) => {
         Find Workspace
       </Title> 
       <WorkingArea>
-        <InputTextBox type="text" onKeyDown={(e) => { if(e.keyCode === 13) { searchWorkspacesHandler() } }}  placeholder="workspace name" ref={inputRef} ></InputTextBox>
-        <SubmitButton onClick={()=>searchWorkspacesHandler()}>Find</SubmitButton>
-        {searchWorkspacesData && searchWorkspacesData.searchWorkspaces.length === 0 && <div>404 Not found :p </div>}
-        {searchWorkspacesData && searchWorkspacesData.searchWorkspaces.map((workspace) => 
-          <div key={workspace.id}>
-            {workspace.name} &nbsp; <LinkButton onClick={() => {joinWorkspaceHandler(workspace.id)}}>Join</LinkButton>
-          </div>
-        )}
+        <SearchWorkspace />
       </WorkingArea>
     </Search>
   );

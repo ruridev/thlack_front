@@ -11,6 +11,7 @@ import { fetchWorkspaces } from '../reducer/workspace.action';
 import WorkspaceChannelPannel from '../components/containers/WorkspaceChannelPannel'
 import NewWorkspacePage from './NewWorkspacePage'
 import NewChannelPage from './NewChannelPage'
+import SearchWorkspacePage from './SearchWorkspacePage'
 
 const Page = ({ current_user, workspaces, fetchWorkspacesHandler }) => {
   const history = useHistory();
@@ -168,7 +169,7 @@ const Page = ({ current_user, workspaces, fetchWorkspacesHandler }) => {
       </Left>
       <Center ref={centerRef}>
         <Switch>
-          <Route path="/workspaces" component={() => <SearchWorkspace history={history} /> } exact />
+          <Route path="/workspaces" component={() => <SearchWorkspacePage /> } exact />
           <Route path="/workspaces/new" component={NewWorkspacePage} exact />
           <Route path="/workspaces/:workspaceId" component={Welcome} exact />
           <Route path="/workspaces/:workspaceId/new" component={NewChannelPage} exact />
