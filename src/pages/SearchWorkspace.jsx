@@ -4,7 +4,7 @@ import { useMutation, useLazyQuery } from '@apollo/client';
 import { SEARCH_WORKSPACES, JOIN_WORKSPACE } from '../queries'
 import { InputTextBox, SubmitButton, LinkButton } from '../styles';
 import { Search, Title, WorkingArea } from '../styles/SearchWorkspace';
-import { setCurrentWorkspace } from '../action/cache';
+import { setCurrentWorkspace } from '../reducer/cache.action';
 import { connect } from 'react-redux';
 
 const Page = ({ onClickWorkspaceLink }) => {

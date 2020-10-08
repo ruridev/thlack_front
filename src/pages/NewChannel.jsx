@@ -4,7 +4,7 @@ import { useMutation } from '@apollo/client';
 import { CREATE_CHANNEL, JOIN_CHANNEL } from '../queries'
 import { LinkButton, InputTextBox, SubmitButton } from '../styles/';
 import { Main, WorkingArea } from '../styles/NewChannel';
-import { addChannel } from '../action/workspace';
+import { addChannel } from '../reducer/workspace.action';
 import { connect } from 'react-redux';
 
 

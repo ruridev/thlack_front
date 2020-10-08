@@ -7,7 +7,7 @@ import {
 import {
   setCurrentUser,
   setCurrentAccount
-} from '../action/cache';
+} from '../reducer/cache.action';
 
 import { connect } from 'react-redux';
 

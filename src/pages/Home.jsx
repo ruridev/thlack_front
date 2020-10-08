@@ -4,8 +4,8 @@ import { useMutation } from '@apollo/client';
 import { connect } from 'react-redux';
 import { auth, signInWithGoogle, signInWithGithub } from '../firebase/firebase.utils';
 import { CREATE_ACCOUNT } from '../queries'
-import { signOut, signIn } from '../action/account';
-import { setCurrentAccount } from '../action/cache';
+import { signOut, signIn } from '../reducer/account.action';
+import { setCurrentAccount } from '../reducer/cache.action';
 import { Home, SignIn, SocialServiceButton } from '../styles/Home';
 
 const Page = ({ signOutHandler, signInHandler, setTokenHandler, removeTokenHandler, setCurrentAccountHandler }) => {

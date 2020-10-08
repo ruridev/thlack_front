@@ -2,12 +2,14 @@ import React, { useState, useRef, useMemo, useCallback } from 'react';
 import { Link, useHistory, useParams } from 'react-router-dom';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import { Main, Left, Center, Right } from '../styles/Workspace';
-import { WorkspaceChannelPannel, UserArea, WorkspaceArea, ChannelArea, Chat, SearchWorkspace, FriendArea } from './';
+import { UserArea, SearchWorkspace, FriendArea } from './';
+import Chat from '../components/containers/Chat'
 import { connect } from 'react-redux';
 import { useEffect } from 'react';
 import { JOIN_CHANNEL, GET_WORKSPACES } from '../queries';
 import { useLazyQuery, useMutation } from '@apollo/client';
-import { fetchWorkspaces } from '../action/workspace';
+import { fetchWorkspaces } from '../reducer/workspace.action';
+import WorkspaceChannelPannel from '../components/containers/WorkspaceChannelPannel'
 
 const Page = ({ current_user, workspaces, fetchWorkspacesHandler }) => {
   console.log("😇 Workspace.jsx rendering");
@@ -30,7 +32,6 @@ const Page = ({ current_user, workspaces, fetchWorkspacesHandler }) => {
       getWorkspaces();
     }
   }, [current_user])
-
 
   useEffect(() => {
     if(workspaceId && channelId) {
@@ -157,10 +158,10 @@ const Page = ({ current_user, workspaces, fetchWorkspacesHandler }) => {
         <Switch>
           <Route path="/workspaces" component={() => <SearchWorkspace history={history} /> } exact />
           <Route path="/workspaces/:workspaceId" component={Welcome} exact />
-          <Route path="/workspaces/:workspaceId/:channelId" component={() => <Chat currentChannel={currentChannel} />} exact />
+          <Route path="/workspaces/:workspaceId/:channelId" component={Chat} exact />
         </Switch>
-        { workspaceId && mode === 'workspace_management' ? <Chat workspaceById={workspaceById} channelById={channelById} /> : null}
-        { workspaceId && channelId && mode === 'channel_management' ? <Chat workspaceById={workspaceById} channelById={channelById} /> : null}
+        { workspaceId && mode === 'workspace_management' ? <Chat /> : null}
+        { workspaceId && channelId && mode === 'channel_management' ? <Chat /> : null}
       </Center>
       <Right ref={rightRef}>
         <UserArea history={history} />

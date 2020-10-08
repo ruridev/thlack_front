@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { LoginUserNavigator, LoginUserButton, ChangeUserButton, LogoutButton } from '../styles/UserArea';
 import { connect } from 'react-redux';
-import { setTheme } from '../action/cache';
+import { setTheme } from '../reducer/cache.action';
 
 const Page = ({ theme, current_user, history, onClickSignOut, setThemeHandler }) => {
   const themeToggler = useCallback(() => {

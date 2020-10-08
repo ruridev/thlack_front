@@ -9,7 +9,7 @@ from './cache.action';
 const initCache = {
   theme: null,
   mode: '',
-  current_account: null,
+  current_account: { users: [] },
   current_user: null,
   current_workspace: null,
 }

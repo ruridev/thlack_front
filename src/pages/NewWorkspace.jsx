@@ -4,8 +4,8 @@ import { useMutation } from '@apollo/client';
 import { InputTextBox, SubmitButton } from '../styles';
 import { Main, WorkingArea } from '../styles/NewWorkspace';
 import { CREATE_WORKSPACE } from '../queries';
-import { setCurrentWorkspace } from '../action/cache'
-import { addWorkspace } from '../action/workspace'
+import { setCurrentWorkspace } from '../reducer/cache.action'
+import { addWorkspace } from '../reducer/workspace.action'
 import { connect } from 'react-redux';
 
 const Page = ({ dispatchCreateWorkspace }) => {
