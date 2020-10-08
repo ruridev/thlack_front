@@ -2,7 +2,6 @@ import React, { useRef, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useMutation, useLazyQuery } from '@apollo/client';
 import { SEARCH_WORKSPACES, JOIN_WORKSPACE } from '../../queries'
-import { Search, Title, WorkingArea } from '../../styles/SearchWorkspace';
 import { setCurrentWorkspace } from '../../reducer/cache.action';
 import { connect } from 'react-redux';
 import SearchWorkspace from '../presenters/search_workspace/SearchWorkspace';
@@ -40,13 +39,11 @@ const Page = ({ onClickWorkspaceLink }) => {
   }, []);
 
   return (
-    <WorkingArea>
-      <SearchWorkspace 
-        inputRef={inputRef}
-        searchWorkspacesHandler={searchWorkspacesHandler}
-        searchWorkspacesData={searchWorkspacesData}
-        joinWorkspaceHandler={joinWorkspaceHandler} />
-    </WorkingArea>
+    <SearchWorkspace 
+      inputRef={inputRef}
+      searchWorkspacesHandler={searchWorkspacesHandler}
+      searchWorkspacesData={searchWorkspacesData}
+      joinWorkspaceHandler={joinWorkspaceHandler} />
   );
 }
 

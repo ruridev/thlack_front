@@ -1,17 +1,17 @@
 import React from 'react';
 import NewWorkspace from '../components/containers/NewWorkspace';
-import { Main, WorkingArea } from '../styles/NewWorkspace';
+import { AlignCenterWrapper, AlignCenter } from '../styles';
 
 const Page = () => {
   return (
-    <Main>
-      <WorkingArea>
+    <AlignCenterWrapper>
+      <AlignCenter>
         <div>
           <h2>Create Workspace</h2>
           <NewWorkspace />
         </div>
-      </WorkingArea>
-    </Main>);
+      </AlignCenter>
+    </AlignCenterWrapper>);
 }
 
 export default React.memo(Page);

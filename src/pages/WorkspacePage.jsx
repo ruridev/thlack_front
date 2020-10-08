@@ -2,13 +2,14 @@ import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { Link, useHistory, useParams } from 'react-router-dom';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import { Main, Left, Center, Right } from '../styles/Workspace';
-import { UserArea, SearchWorkspace, FriendArea } from './';
+import { FriendArea } from './';
 import Chat from '../components/containers/Chat'
 import { connect } from 'react-redux';
 import { JOIN_CHANNEL, GET_WORKSPACES } from '../queries';
 import { useLazyQuery, useMutation } from '@apollo/client';
 import { fetchWorkspaces } from '../reducer/workspace.action';
 import WorkspaceChannelPannel from '../components/containers/WorkspaceChannelPannel'
+import UserArea from '../components/containers/UserArea';
 import NewWorkspacePage from './NewWorkspacePage'
 import NewChannelPage from './NewChannelPage'
 import SearchWorkspacePage from './SearchWorkspacePage'
@@ -179,8 +180,8 @@ const Page = ({ current_user, workspaces, fetchWorkspacesHandler }) => {
         { workspaceId && channelId && mode === 'channel_management' ? <Chat /> : null}
       </Center>
       <Right ref={rightRef}>
-        <UserArea history={history} />
-        <FriendArea history={history} />
+        <UserArea />
+        <FriendArea />
       </Right>
     </Main>
   );

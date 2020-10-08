@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { Main, WorkingArea } from '../styles/NewChannel';
+import { AlignCenterWrapper, AlignCenter } from '../styles';
 import { addChannel } from '../reducer/workspace.action';
 import { connect } from 'react-redux';
 import NewChannel from '../components/containers/NewChannel';
@@ -20,14 +20,14 @@ const Page = ({ workspaces }) => {
   }, [workspaces, workspaceId]);
 
   return (
-    <Main>
-      <WorkingArea>
+    <AlignCenterWrapper>
+      <AlignCenter>
         <div>
           <h2>Create a channel in ”{currentWorkspace && `${currentWorkspace.name}”`}</h2>
           <NewChannel />
         </div>
-      </WorkingArea>
-    </Main>);
+      </AlignCenter>
+    </AlignCenterWrapper>);
 }
 
 function mapStateToProps({ workspaces }) {

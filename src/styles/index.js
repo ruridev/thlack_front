@@ -76,6 +76,24 @@ const TextArea = styled.textarea`
 }
 `;
 
+
+const AlignCenterWrapper = styled.div`
+  height: 100vh;
+  display: grid;
+  grid-template-areas: 
+    ". . . ."
+    ". ac ac ."
+    ". . . .";
+  grid-template-columns: auto auto auto;
+  grid-template-rows: auto auto auto;
+  `
+
+const AlignCenter = styled.div`
+  grid-area: ac;
+  text-align: center;
+`
+
+
 export { 
   LinkDiv,
   LinkButton, 
@@ -84,4 +102,6 @@ export {
   SmallLinkButton,
   ListPopup,
   TextArea,
+  AlignCenterWrapper,
+  AlignCenter,
 };

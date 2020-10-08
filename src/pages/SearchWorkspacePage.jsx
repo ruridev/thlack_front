@@ -2,8 +2,7 @@ import React, { useRef, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useMutation, useLazyQuery } from '@apollo/client';
 import { SEARCH_WORKSPACES, JOIN_WORKSPACE } from '../queries'
-import { InputTextBox, SubmitButton, LinkButton } from '../styles';
-import { Search, Title, WorkingArea } from '../styles/SearchWorkspace';
+import { AlignCenterWrapper, AlignCenter } from '../styles';
 import { setCurrentWorkspace } from '../reducer/cache.action';
 import { connect } from 'react-redux';
 import SearchWorkspace from '../components/containers/SearchWorkspace';
@@ -39,15 +38,15 @@ const Page = ({ onClickWorkspaceLink }) => {
     joinWorkspace({variables: { workspace_id: parseInt(workspace_id) } });
   }, []);
 
-  return (
-    <Search>
-      <Title>
-        Find Workspace
-      </Title> 
-      <WorkingArea>
+  return ( 
+    <AlignCenterWrapper>
+      <AlignCenter>
+        <h2>
+          Find Workspace
+        </h2>
         <SearchWorkspace />
-      </WorkingArea>
-    </Search>
+      </AlignCenter>
+    </AlignCenterWrapper>
   );
 }
 

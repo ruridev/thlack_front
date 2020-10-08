@@ -1,8 +1,7 @@
 import HomePage from './HomePage';
 import ChangeUserPage from './ChangeUserPage';
 import NewChannelPage from './NewChannelPage';
-import Workspace from './Workspace';
-import UserArea from './UserArea';
+import WorkspacePage from './WorkspacePage';
 import FriendArea from './FriendArea';
 import NewWorkspacePage from './NewWorkspacePage';
 import SearchWorkspacePage from './SearchWorkspacePage';
@@ -13,8 +12,7 @@ export {
   ChangeUserPage, 
   NewWorkspacePage,
   NewChannelPage, 
-  Workspace, 
-  UserArea,
+  WorkspacePage, 
   FriendArea,
   SearchWorkspacePage,
   RefreshData,
