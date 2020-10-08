@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
-import { HomePage, ChangeUserPage, NewWorkspace, NewChannel, Workspace, RefreshData } from './pages';
+import { HomePage, ChangeUserPage, NewWorkspace, NewChannelPage, Workspace, RefreshData } from './pages';
 import { connect } from 'react-redux';
 import { ThemeProvider } from "styled-components";
 import { GlobalStyles } from "./styles/GlobalStyles";
@@ -15,8 +15,6 @@ const App = ({ currentTheme }) => {
           <Router>
             <Switch>
               <Route path="/sigin" component={HomePage} exact />
-              <Route path="/workspaces/new" component={NewWorkspace} exact />
-              <Route path="/workspaces/:workspaceId/new" component={NewChannel} exact />
               <Route path="/change_user" component={ChangeUserPage} exact />  
               <Route path="/workspaces" component={Workspace} exact />
               <Route path="/workspaces/:workspaceId" component={Workspace} exact />

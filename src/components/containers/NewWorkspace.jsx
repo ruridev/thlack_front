@@ -1,14 +1,13 @@
 import React, { useCallback, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useMutation } from '@apollo/client';
-import { InputTextBox, SubmitButton } from '../styles';
-import { Main, WorkingArea } from '../styles/NewWorkspace';
-import { CREATE_WORKSPACE } from '../queries';
-import { setCurrentWorkspace } from '../reducer/cache.action'
-import { addWorkspace } from '../reducer/workspace.action'
+import { CREATE_WORKSPACE } from '../../queries';
+import { setCurrentWorkspace } from '../../reducer/cache.action'
+import { addWorkspace } from '../../reducer/workspace.action'
 import { connect } from 'react-redux';
+import NewWorkspace from '../presenters/new_workspace/NewWorkspace';
 
-const Page = ({ dispatchCreateWorkspace }) => {
+const Container = ({ dispatchCreateWorkspace, }) => {
   const inputRef = useRef();
   const history = useHistory();
 
@@ -32,17 +31,11 @@ const Page = ({ dispatchCreateWorkspace }) => {
     });
   }, [inputRef]);
 
-
-  return (
-    <Main>
-      <WorkingArea>
-        <div>
-          <h2>Create Workspace</h2>
-          <InputTextBox type="text" placeholder="Team Thlack" ref={inputRef}></InputTextBox>
-          <SubmitButton onClick={createWorkspaceHandler}>Create</SubmitButton>
-        </div>
-      </WorkingArea>
-    </Main>);
+  return (<>
+    <NewWorkspace
+      createWorkspaceHandler={createWorkspaceHandler}
+      inputRef={inputRef} />
+  </>);
 }
 
 function dispatchToProps(dispatch) {
@@ -54,4 +47,4 @@ function dispatchToProps(dispatch) {
   }
 }
 
-export default connect(null, dispatchToProps)(Page);
+export default connect(null, dispatchToProps)(Container);

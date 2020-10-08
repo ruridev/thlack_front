@@ -2,13 +2,16 @@ import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useMutation } from '@apollo/client';
 import { connect } from 'react-redux';
-import { auth, signInWithGoogle, signInWithGithub } from '../firebase/firebase.utils';
-import { CREATE_ACCOUNT } from '../queries'
-import { signOut, signIn } from '../reducer/account.action';
-import { setCurrentAccount } from '../reducer/cache.action';
-import { Home, SignIn, SocialServiceButton } from '../styles/Home';
+import { auth, signInWithGoogle, signInWithGithub } from '../../firebase/firebase.utils';
+import { CREATE_ACCOUNT } from '../../queries'
+import { signOut, signIn } from '../../reducer/account.action';
+import { setCurrentAccount } from '../../reducer/cache.action';
+import SocialLogin from '../presenters/home/SocialLogin';
+import { SignIn } from '../../styles/Home'
 
 const Page = ({ signOutHandler, signInHandler, setTokenHandler, removeTokenHandler, setCurrentAccountHandler }) => {
+  const history = useHistory();
+
   const [createAccount] = useMutation(
     CREATE_ACCOUNT,
     {
@@ -18,8 +21,6 @@ const Page = ({ signOutHandler, signInHandler, setTokenHandler, removeTokenHandl
         history.push('/change_user');
       }
     });
-
-  const history = useHistory();
 
   useEffect(() => {
     let flag = true;
@@ -48,29 +49,17 @@ const Page = ({ signOutHandler, signInHandler, setTokenHandler, removeTokenHandl
   }, []);
 
   return(
-    <Home>
-      <SignIn>
-        <div>
-          <h1>
-            Thlack
-          </h1>
-        </div> 
-        <hr />
-        <p>
-          <SocialServiceButton onClick={signInWithGoogle}>
-            <b><font color="blue">G</font>
-            <font color="red">o</font>
-            <font color="orange">o</font>
-            <font color="blue">g</font>
-            <font color="green">l</font>
-            <font color="red">e</font></b>
-            </SocialServiceButton>&nbsp;
-          <SocialServiceButton  onClick={signInWithGithub}>
-            <b>GitHub</b>
-          </SocialServiceButton>
-        </p>
-      </SignIn>
-    </Home>
+    <SignIn>
+      <div>
+        <h1>Thlack</h1>
+      </div> 
+      <hr />
+      <p>
+        <SocialLogin
+          signInWithGoogle={signInWithGoogle}
+          signInWithGithub={signInWithGithub} />
+      </p>
+    </SignIn>
   )
 }
 

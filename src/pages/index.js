@@ -1,18 +1,18 @@
-import HomePage from './Home';
+import HomePage from './HomePage';
 import ChangeUserPage from './ChangeUserPage';
-import NewChannel from './NewChannel';
+import NewChannelPage from './NewChannelPage';
 import Workspace from './Workspace';
 import UserArea from './UserArea';
 import FriendArea from './FriendArea';
-import NewWorkspace from './NewWorkspace';
+import NewWorkspacePage from './NewWorkspacePage';
 import SearchWorkspace from './SearchWorkspace';
 import RefreshData from './RefreshData';
 
 export {
   HomePage,
   ChangeUserPage, 
-  NewWorkspace,
-  NewChannel, 
+  NewWorkspacePage,
+  NewChannelPage, 
   Workspace, 
   UserArea,
   FriendArea,
