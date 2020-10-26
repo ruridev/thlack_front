@@ -9,15 +9,15 @@ const Container = ({ workspaces }) => {
 
   const onClickSearchWorkspace = useCallback(() => {
     history.push('/workspaces');
-  }, []);
+  }, [history]);
   
   const onClickNewWorkspace = useCallback(() => {
     history.push('/workspaces/new');
-  }, []);
+  }, [history]);
 
   const onClickWorkspaceLink = useCallback((workspace_id) => {
     history.push(`/workspaces/${workspace_id}`);
-  }, []);
+  }, [history]);
 
   return (
     <WorkspaceArea 

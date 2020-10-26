@@ -1,22 +1,18 @@
 import React, { useRef, useCallback, useMemo } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { isReference, useMutation } from '@apollo/client';
-import { CREATE_CHANNEL } from '../../queries'
 import { addChannel } from '../../reducer/workspace.action';
 import NewChannel from '../presenters/new_channel/NewChannel';
+import { useCreateChannel } from '../../graphql/mutations';
 
 const Container = ({ workspaces, addChannelHandler }) => {
   const inputRef = useRef();
   const { workspaceId } = useParams();
   const history = useHistory();
 
-  const [createChannel] = useMutation(CREATE_CHANNEL, {
-    onCompleted({createChannel: { channel }}){
-      addChannelHandler(workspaceId, channel)
-      history.push(`/workspaces/${workspaceId}/${channel.id}`);
-    }
-  });
+  const createChannel = useCreateChannel(({ createChannel: { channel }}) => {
+    history.push(`/workspaces/${workspaceId}/${channel.id}`);
+  }, { storeAction: true });
 
   const createChannelHandler = useCallback(() => {
     if(inputRef && inputRef.current){
@@ -26,13 +22,11 @@ const Container = ({ workspaces, addChannelHandler }) => {
       }
 
       createChannel({
-        variables: {
-          name: inputRef.current.value,
-          workspace_id: parseInt(workspaceId)
-        },
+        name: inputRef.current.value,
+        workspace_id: parseInt(workspaceId)
       });
     }
-  }, [inputRef, createChannel]);
+  }, [inputRef, createChannel, workspaceId]);
 
   const currentWorkspace = useMemo(() => {
     if(workspaces && workspaceId) {

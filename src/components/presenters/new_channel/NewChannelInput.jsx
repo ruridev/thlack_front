@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { InputTextBox, SubmitButton } from '../../../styles';
 
 const Presenter = ({ createChannelHandler, inputRef }) => {

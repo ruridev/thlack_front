@@ -1,40 +1,17 @@
-import React, { useEffect, useCallback } from 'react';
-import { useLazyQuery } from '@apollo/client';
-import {
-  GET_ACCOUNT,
-  GET_LOGIN_USER,
-} from '../queries';
-import {
-  setCurrentUser,
-  setCurrentAccount
-} from '../reducer/cache.action';
+import React, { useEffect } from 'react';
+import { useGetAccount, useLoginUser } from '../graphql/queries';
 
-import { connect } from 'react-redux';
-
-const Page = ({
-  setCurrentAccountHandler,
-  setCurrentUserHandler,
-}) => {
-  const [getAccount] = useLazyQuery(GET_ACCOUNT, {
-    fetchPolicy: `network-only`,
-    onCompleted({ account }){
-      setCurrentAccountHandler(account);
-    }
-  });
-  const [getLoginUser] = useLazyQuery(GET_LOGIN_USER, {
-    fetchPolicy: `network-only`,
-    onCompleted({ loginUser }){
-      setCurrentAccountHandler(loginUser.account);
-      setCurrentUserHandler(loginUser);
-    }
-  });
+const Page = () => {
+  const getAccount = useGetAccount(() => {
+  }, { storeAction: true });
+  const getLoginUser = useLoginUser(() => {
+  }, { storeAction: true });
 
   useEffect(() => {
     let flag = true;
 
     if(flag){
       let tokenKind = localStorage.getItem('kind');
-      let tokenValue = localStorage.getItem('token');
       if(tokenKind === 'account') {
         async function f(){
           await getAccount();
@@ -55,20 +32,9 @@ const Page = ({
     return function() {
       flag = false;
     }
-  }, []);
+  }, [getAccount, getLoginUser]);
 
   return <></>;
 }
 
-function dispatchToProps(dispatch) {
-  return {
-    setCurrentAccountHandler: (account) => {
-      dispatch(setCurrentAccount(account));
-    },
-    setCurrentUserHandler: (user) => {
-      dispatch(setCurrentUser(user));
-    },
-  }
-}
-
-export default connect(null, dispatchToProps)(Page);
+export default React.memo(Page);

@@ -3,32 +3,26 @@ import { useParams } from 'react-router-dom';
 import { Route, Switch } from 'react-router-dom';
 import { Main, Left, Center, Right } from '../styles/Workspace';
 import { connect } from 'react-redux';
-import { JOIN_CHANNEL, GET_WORKSPACES } from '../queries';
-import { useLazyQuery, useMutation } from '@apollo/client';
-import { fetchWorkspaces } from '../reducer/workspace.action';
 import Chat from '../components/containers/Chat'
 import WorkspaceChannelPannel from '../components/containers/WorkspaceChannelPannel'
 import UserArea from '../components/containers/UserArea';
 import FriendArea from '../components/containers/FriendArea';
 import NewWorkspace from '../components/containers/NewWorkspace'
 import NewChannel from '../components/containers/NewChannel'
-import SearchWorkspacePage from '../components/containers/SearchWorkspacePage'
+import SearchWorkspace from '../components/containers/SearchWorkspace'
+import UserProfile from '../components/containers/UserProfile'
+import { useJoinChannel } from '../graphql/mutations';
+import { useGetWorkspaces } from '../graphql/queries';
 
-const Page = ({ current_user, workspaces, fetchWorkspacesHandler }) => {
+const Page = ({ current_user, workspaces }) => {
   const { workspaceId, channelId } = useParams();
   const [mode, setMode] = useState('chat');
   
-  const [joinChannel] = useMutation(JOIN_CHANNEL, {
-    onCompleted(){
-      setMode('chat');
-    }
-  });
-  const [getWorkspaces] = useLazyQuery(GET_WORKSPACES, {
-    fetchPolicy: `network-only`,
-    onCompleted(data){
-      fetchWorkspacesHandler(data.workspaces);
-    }
-  });
+  const joinChannel = useJoinChannel(() => {
+    setMode('chat');
+  }, {});
+  const getWorkspaces = useGetWorkspaces(() => { 
+  }, { storeAction: true });
 
   const currentWorkspace = useMemo(() => {
     if(workspaces && workspaceId) {
@@ -49,22 +43,20 @@ const Page = ({ current_user, workspaces, fetchWorkspacesHandler }) => {
     return function() {
       flag = false;
     }
-  }, [current_user])
+  }, [current_user, getWorkspaces])
 
   useEffect(() => {
     let flag = true;
     if(flag && workspaceId && channelId && channelId !== "new") {
       joinChannel({
-        variables: {
-          workspace_id: parseInt(workspaceId),
-          channel_id: parseInt(channelId)
-        }
+        workspace_id: parseInt(workspaceId),
+        channel_id: parseInt(channelId)
       });
     }
     return function(){
       flag = false;
     }
-  }, [workspaceId, channelId]);
+  }, [joinChannel, workspaceId, channelId]);
 
   const Welcome = () => {
     return (
@@ -86,38 +78,36 @@ const Page = ({ current_user, workspaces, fetchWorkspacesHandler }) => {
     );
   }
 
-  const txt = `
-  ───▄▀▀▀▄▄▄▄▄▄▄▀▀▀▄───
-  ───█▒▒░░░░░░░░░▒▒█───
-  ────█░░█░░░░░█░░█────
-  ─▄▄──█░░░▀█▀░░░█──▄▄─
-  █░░█─▀▄░░░░░░░▄▀─█░░█
+  // ───▄▀▀▀▄▄▄▄▄▄▄▀▀▀▄───
+  // ───█▒▒░░░░░░░░░▒▒█───
+  // ────█░░█░░░░░█░░█────
+  // ─▄▄──█░░░▀█▀░░░█──▄▄─
+  // █░░█─▀▄░░░░░░░▄▀─█░░█
   
-  ╭╮╱╭┳━━━┳╮╱╱╭╮╱╱╭━━━╮╭╮╭╮╭┳━━━┳━━━┳╮╱╱╭━━━╮
-  ┃┃╱┃┃╭━━┫┃╱╱┃┃╱╱┃╭━╮┃┃┃┃┃┃┃╭━╮┃╭━╮┃┃╱╱╰╮╭╮┃
-  ┃╰━╯┃╰━━┫┃╱╱┃┃╱╱┃┃╱┃┃┃┃┃┃┃┃┃╱┃┃╰━╯┃┃╱╱╱┃┃┃┃
-  ┃╭━╮┃╭━━┫┃╱╭┫┃╱╭┫┃╱┃┃┃╰╯╰╯┃┃╱┃┃╭╮╭┫┃╱╭╮┃┃┃┃
-  ┃┃╱┃┃╰━━┫╰━╯┃╰━╯┃╰━╯┃╰╮╭╮╭┫╰━╯┃┃┃╰┫╰━╯┣╯╰╯┣╮
-  ╰╯╱╰┻━━━┻━━━┻━━━┻━━━╯╱╰╯╰╯╰━━━┻╯╰━┻━━━┻━━━┻╯
-  ╭━━━━┳╮╱╭┳━━┳━━━╮╭━━┳━━━╮╭━━━━┳╮╱╭┳╮╱╱╭━━━┳━━━┳╮╭━╮
-  ┃╭╮╭╮┃┃╱┃┣┫┣┫╭━╮┃╰┫┣┫╭━╮┃┃╭╮╭╮┃┃╱┃┃┃╱╱┃╭━╮┃╭━╮┃┃┃╭╯
-  ╰╯┃┃╰┫╰━╯┃┃┃┃╰━━╮╱┃┃┃╰━━╮╰╯┃┃╰┫╰━╯┃┃╱╱┃┃╱┃┃┃╱╰┫╰╯╯
-  ╱╱┃┃╱┃╭━╮┃┃┃╰━━╮┃╱┃┃╰━━╮┃╱╱┃┃╱┃╭━╮┃┃╱╭┫╰━╯┃┃╱╭┫╭╮┃
-  ╱╱┃┃╱┃┃╱┃┣┫┣┫╰━╯┃╭┫┣┫╰━╯┃╱╱┃┃╱┃┃╱┃┃╰━╯┃╭━╮┃╰━╯┃┃┃╰╮
-  ╱╱╰╯╱╰╯╱╰┻━━┻━━━╯╰━━┻━━━╯╱╱╰╯╱╰╯╱╰┻━━━┻╯╱╰┻━━━┻╯╰━╯
-  ╭━━━┳━━━┳━━━╮╭━━━┳╮╱╱╭┳━━━┳━━━┳╮╱╱╭┳━━━┳━╮╱╭┳━━━╮╭━━━╮
-  ┃╭━━┫╭━╮┃╭━╮┃┃╭━━┫╰╮╭╯┃╭━━┫╭━╮┃╰╮╭╯┃╭━╮┃┃╰╮┃┃╭━━╋┫╭━╮┃
-  ┃╰━━┫┃╱┃┃╰━╯┃┃╰━━╋╮┃┃╭┫╰━━┫╰━╯┣╮╰╯╭┫┃╱┃┃╭╮╰╯┃╰━━┫┃╰━━╮
-  ┃╭━━┫┃╱┃┃╭╮╭╯┃╭━━╯┃╰╯┃┃╭━━┫╭╮╭╯╰╮╭╯┃┃╱┃┃┃╰╮┃┃╭━━┻┻━━╮┃
-  ┃┃╱╱┃╰━╯┃┃┃╰╮┃╰━━╮╰╮╭╯┃╰━━┫┃┃╰╮╱┃┃╱┃╰━╯┃┃╱┃┃┃╰━━╮┃╰━╯┣╮
-  ╰╯╱╱╰━━━┻╯╰━╯╰━━━╯╱╰╯╱╰━━━┻╯╰━╯╱╰╯╱╰━━━┻╯╱╰━┻━━━╯╰━━━┻╯
-  ╭╮╱╭┳━━━┳━━━┳━━━┳╮╱╱╭╮╭╮╱╭┳━━━┳━━━┳╮╭━┳━━┳━╮╱╭┳━━━╮╭╮
-  ┃┃╱┃┃╭━╮┃╭━╮┃╭━╮┃╰╮╭╯┃┃┃╱┃┃╭━╮┃╭━╮┃┃┃╭┻┫┣┫┃╰╮┃┃╭━╮┃┃┃
-  ┃╰━╯┃┃╱┃┃╰━╯┃╰━╯┣╮╰╯╭╯┃╰━╯┃┃╱┃┃┃╱╰┫╰╯╯╱┃┃┃╭╮╰╯┃┃╱╰╯┃┃
-  ┃╭━╮┃╰━╯┃╭━━┫╭━━╯╰╮╭╯╱┃╭━╮┃╰━╯┃┃╱╭┫╭╮┃╱┃┃┃┃╰╮┃┃┃╭━╮╰╯
-  ┃┃╱┃┃╭━╮┃┃╱╱┃┃╱╱╱╱┃┃╱╱┃┃╱┃┃╭━╮┃╰━╯┃┃┃╰┳┫┣┫┃╱┃┃┃╰┻━┃╭╮
-  ╰╯╱╰┻╯╱╰┻╯╱╱╰╯╱╱╱╱╰╯╱╱╰╯╱╰┻╯╱╰┻━━━┻╯╰━┻━━┻╯╱╰━┻━━━╯╰╯
-  `;
+  // ╭╮╱╭┳━━━┳╮╱╱╭╮╱╱╭━━━╮╭╮╭╮╭┳━━━┳━━━┳╮╱╱╭━━━╮
+  // ┃┃╱┃┃╭━━┫┃╱╱┃┃╱╱┃╭━╮┃┃┃┃┃┃┃╭━╮┃╭━╮┃┃╱╱╰╮╭╮┃
+  // ┃╰━╯┃╰━━┫┃╱╱┃┃╱╱┃┃╱┃┃┃┃┃┃┃┃┃╱┃┃╰━╯┃┃╱╱╱┃┃┃┃
+  // ┃╭━╮┃╭━━┫┃╱╭┫┃╱╭┫┃╱┃┃┃╰╯╰╯┃┃╱┃┃╭╮╭┫┃╱╭╮┃┃┃┃
+  // ┃┃╱┃┃╰━━┫╰━╯┃╰━╯┃╰━╯┃╰╮╭╮╭┫╰━╯┃┃┃╰┫╰━╯┣╯╰╯┣╮
+  // ╰╯╱╰┻━━━┻━━━┻━━━┻━━━╯╱╰╯╰╯╰━━━┻╯╰━┻━━━┻━━━┻╯
+  // ╭━━━━┳╮╱╭┳━━┳━━━╮╭━━┳━━━╮╭━━━━┳╮╱╭┳╮╱╱╭━━━┳━━━┳╮╭━╮
+  // ┃╭╮╭╮┃┃╱┃┣┫┣┫╭━╮┃╰┫┣┫╭━╮┃┃╭╮╭╮┃┃╱┃┃┃╱╱┃╭━╮┃╭━╮┃┃┃╭╯
+  // ╰╯┃┃╰┫╰━╯┃┃┃┃╰━━╮╱┃┃┃╰━━╮╰╯┃┃╰┫╰━╯┃┃╱╱┃┃╱┃┃┃╱╰┫╰╯╯
+  // ╱╱┃┃╱┃╭━╮┃┃┃╰━━╮┃╱┃┃╰━━╮┃╱╱┃┃╱┃╭━╮┃┃╱╭┫╰━╯┃┃╱╭┫╭╮┃
+  // ╱╱┃┃╱┃┃╱┃┣┫┣┫╰━╯┃╭┫┣┫╰━╯┃╱╱┃┃╱┃┃╱┃┃╰━╯┃╭━╮┃╰━╯┃┃┃╰╮
+  // ╱╱╰╯╱╰╯╱╰┻━━┻━━━╯╰━━┻━━━╯╱╱╰╯╱╰╯╱╰┻━━━┻╯╱╰┻━━━┻╯╰━╯
+  // ╭━━━┳━━━┳━━━╮╭━━━┳╮╱╱╭┳━━━┳━━━┳╮╱╱╭┳━━━┳━╮╱╭┳━━━╮╭━━━╮
+  // ┃╭━━┫╭━╮┃╭━╮┃┃╭━━┫╰╮╭╯┃╭━━┫╭━╮┃╰╮╭╯┃╭━╮┃┃╰╮┃┃╭━━╋┫╭━╮┃
+  // ┃╰━━┫┃╱┃┃╰━╯┃┃╰━━╋╮┃┃╭┫╰━━┫╰━╯┣╮╰╯╭┫┃╱┃┃╭╮╰╯┃╰━━┫┃╰━━╮
+  // ┃╭━━┫┃╱┃┃╭╮╭╯┃╭━━╯┃╰╯┃┃╭━━┫╭╮╭╯╰╮╭╯┃┃╱┃┃┃╰╮┃┃╭━━┻┻━━╮┃
+  // ┃┃╱╱┃╰━╯┃┃┃╰╮┃╰━━╮╰╮╭╯┃╰━━┫┃┃╰╮╱┃┃╱┃╰━╯┃┃╱┃┃┃╰━━╮┃╰━╯┣╮
+  // ╰╯╱╱╰━━━┻╯╰━╯╰━━━╯╱╰╯╱╰━━━┻╯╰━╯╱╰╯╱╰━━━┻╯╱╰━┻━━━╯╰━━━┻╯
+  // ╭╮╱╭┳━━━┳━━━┳━━━┳╮╱╱╭╮╭╮╱╭┳━━━┳━━━┳╮╭━┳━━┳━╮╱╭┳━━━╮╭╮
+  // ┃┃╱┃┃╭━╮┃╭━╮┃╭━╮┃╰╮╭╯┃┃┃╱┃┃╭━╮┃╭━╮┃┃┃╭┻┫┣┫┃╰╮┃┃╭━╮┃┃┃
+  // ┃╰━╯┃┃╱┃┃╰━╯┃╰━╯┣╮╰╯╭╯┃╰━╯┃┃╱┃┃┃╱╰┫╰╯╯╱┃┃┃╭╮╰╯┃┃╱╰╯┃┃
+  // ┃╭━╮┃╰━╯┃╭━━┫╭━━╯╰╮╭╯╱┃╭━╮┃╰━╯┃┃╱╭┫╭╮┃╱┃┃┃┃╰╮┃┃┃╭━╮╰╯
+  // ┃┃╱┃┃╭━╮┃┃╱╱┃┃╱╱╱╱┃┃╱╱┃┃╱┃┃╭━╮┃╰━╯┃┃┃╰┳┫┣┫┃╱┃┃┃╰┻━┃╭╮
+  // ╰╯╱╰┻╯╱╰┻╯╱╱╰╯╱╱╱╱╰╯╱╱╰╯╱╰┻╯╱╰┻━━━┻╯╰━┻━━┻╯╱╰━┻━━━╯╰╯
 
   return (
     <Main>
@@ -126,11 +116,12 @@ const Page = ({ current_user, workspaces, fetchWorkspacesHandler }) => {
       </Left>
       <Center>
         <Switch>
-          <Route path="/workspaces" component={() => <SearchWorkspacePage /> } exact />
+          <Route path="/workspaces" component={() => <SearchWorkspace /> } exact />
           <Route path="/workspaces/new" component={NewWorkspace} exact />
           <Route path="/workspaces/:workspaceId" component={Welcome} exact />
           <Route path="/workspaces/:workspaceId/new" component={NewChannel} exact />
           <Route path="/workspaces/:workspaceId/:channelId" component={Chat} exact />
+          <Route path="/users/:userId" component={UserProfile} exact />
         </Switch>
         { workspaceId && mode === 'workspace_management' ? <Chat /> : null}
         { workspaceId && channelId && mode === 'channel_management' ? <Chat /> : null}
@@ -147,12 +138,4 @@ function mapStateToProps({ cache: { current_user, current_workspace }, workspace
   return { current_user, current_workspace, workspaces };
 }
 
-function dispatchToProps(dispatch) {
-  return {
-    fetchWorkspacesHandler: (workspaces) => {
-      dispatch(fetchWorkspaces(workspaces));
-    }
-  }
-}
-
-export default connect(mapStateToProps, dispatchToProps)(Page);
+export default connect(mapStateToProps, null)(Page);

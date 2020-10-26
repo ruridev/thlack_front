@@ -1,5 +1,5 @@
 import React from 'react';
-import { SmallLinkButton, ListPopup, LinkDiv, LinkButton } from '../../../styles';
+import { SmallLinkButton, ListPopup, LinkDiv } from '../../../styles';
 import MessageEditPopup from './MessageEditPopup';
 import Popup from 'reactjs-popup';
 

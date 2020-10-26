@@ -1,22 +1,23 @@
 import React, { useRef, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { useLazyQuery, useMutation } from '@apollo/client';
-import { GET_LOGIN_USER, CREATE_USER } from '../../queries';
 import { setCurrentUser } from '../../reducer/cache.action';
 import { fetchWorkspaces } from '../../reducer/workspace.action';
 import ChangeUser from '../presenters/change_user/ChangeUser'
+import { useLoginUser } from '../../graphql/queries'
+import { useCreateUser } from '../../graphql/mutations'
 
 const Container = ({ users, setCurrentUserHandler, fetchWorkspacesHandler }) => {
   const history = useHistory();
   const inputRef = useRef();
 
-  const [createUser] = useMutation(CREATE_USER, {
-    onCompleted({createUser: { user }}){
-      setCurrentUserHandler(user);
-      history.push('/workspaces');
-    }
-  });
+  const getLoginUser = useLoginUser(() => {
+    history.push('/workspaces');
+  }, { storeAction: true })
+
+  const createUser = useCreateUser(() => {
+    history.push('/workspaces');
+  }, { storeAction: true })
 
   const createUserHandler = useCallback(() => {
     if(inputRef.current.value.trim().length === 0){
@@ -24,29 +25,13 @@ const Container = ({ users, setCurrentUserHandler, fetchWorkspacesHandler }) => 
       return false;
     }
     createUser({
-      variables: {
-        name: inputRef.current.value
-      },
+      name: inputRef.current.value
     });
-  }, [inputRef]);
-
-  const [getLoginUser] = useLazyQuery(GET_LOGIN_USER, {
-    fetchPolicy: `network-only`,
-    onCompleted({ loginUser }){
-      setCurrentUserHandler(loginUser);    
-      fetchWorkspacesHandler(loginUser.workspaces);
-      
-      history.push('/workspaces');
-    }
-  });
+  }, [inputRef, createUser]);
 
   const getLoginUserHandler = useCallback((user_id) => {
-    getLoginUser({
-      variables: {
-        id: parseInt(user_id)
-      },
-    });
-  }, []);
+    getLoginUser({ id: parseInt(user_id) });
+  }, [getLoginUser]);
 
   return (
     <ChangeUser 

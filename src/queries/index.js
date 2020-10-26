@@ -232,6 +232,7 @@ const CREATE_ACCOUNT = gql`
           name
         }
       }
+      alreadyExists
     }
   }
 `;

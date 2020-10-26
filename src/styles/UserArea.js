@@ -14,16 +14,6 @@ const LoginUserImage = styled.div`
   text-align: center;
 `;
 
-const ChangeUserButton = styled.div`
-  padding-bottom: 8px;
-  text-align: center;
-  font-size: 0.7rem;
-  :hover {
-    text-decoration: underline;
-    cursor: pointer;
-  }
-`;
-
 const LogoutButton = styled.div`
   padding-bottom: 8px;
   text-align: center;
@@ -38,6 +28,5 @@ export {
   LoginUserNavigator,
   LoginUserButton,
   LoginUserImage,
-  ChangeUserButton,
   LogoutButton
 };

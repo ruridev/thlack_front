@@ -1,58 +1,44 @@
-import React, { useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
-import { connect } from 'react-redux';
-import { useMutation, useLazyQuery } from '@apollo/client';
-import { SEARCH_WORKSPACES, JOIN_WORKSPACE } from '../../queries'
-import { setCurrentWorkspace } from '../../reducer/cache.action';
+import { useJoinWorkspace } from '../../graphql/mutations';
+import { useSearchWorkspaces } from '../../graphql/queries';
 import SearchWorkspace from '../presenters/search_workspace/SearchWorkspace';
 
 const Page = ({ onClickWorkspaceLink }) => {
   const history = useHistory();
   const inputRef = useRef();
 
-  const [searchWorkspaces, { data: searchWorkspacesData }] = useLazyQuery(
-    SEARCH_WORKSPACES,
-    {
-      fetchPolicy: `network-only`,
-    }
-  );
-  const [joinWorkspace] = useMutation(
-    JOIN_WORKSPACE,
-    {
-      onCompleted({ joinWorkspace: { workspace } }) {
-        onClickWorkspaceLink(workspace);
-        history.push(`/workspaces/${workspace.id}`);
-      }
-    }
-  );
+  const [workspacesData, setWorkspacesData] = useState();
+  
+  const searchWorkspaces = useSearchWorkspaces((data) => {
+    setWorkspacesData(data);
+  }, { storeAction: true });
+
+  const joinWorkspace = useJoinWorkspace(({ joinWorkspace: { workspace } }) => {
+    history.push(`/workspaces/${workspace.id}`);
+  }, { storeAction: true });
 
   const searchWorkspacesHandler = useCallback(() => {
     if(inputRef.current.value.trim().length === 0){
       inputRef.current.focus();
       return false;
     }
-    searchWorkspaces({ variables: { name: inputRef.current.value } })  
-  }, [inputRef]);
+    searchWorkspaces({
+      name: inputRef.current.value,
+    });
+  }, [searchWorkspaces, inputRef]);
 
   const joinWorkspaceHandler = useCallback((workspace_id) => {
-    joinWorkspace({variables: { workspace_id: parseInt(workspace_id) } });
-  }, []);
+    joinWorkspace({ workspace_id: parseInt(workspace_id) });
+  }, [joinWorkspace]);
 
   return (
     <SearchWorkspace 
       inputRef={inputRef}
       searchWorkspacesHandler={searchWorkspacesHandler}
-      searchWorkspacesData={searchWorkspacesData}
+      searchWorkspacesData={workspacesData}
       joinWorkspaceHandler={joinWorkspaceHandler} />
   );
 }
 
-function dispatchToProps(dispatch) {
-  return {
-    onClickWorkspaceLink: (workspace) => {
-      dispatch(setCurrentWorkspace(workspace));
-    },
-  }
-}
-
-export default connect(null, dispatchToProps)(Page);
+export default React.memo(Page);

@@ -14,11 +14,10 @@ const Presenter = ({
   editMessageHandler,
 }) => {
   return (
-    <Message key={message.id}>
-      <a name={message.id}></a>
+    <Message>
       {message.kind !== 'system_message' && <div>
         <small>
-          [<LinkButton onClick={() => { onClickReplyMessage(message.id)}}>{message.id}</LinkButton>]&nbsp;
+          [<LinkButton name={message.id} onClick={() => { onClickReplyMessage(message.id)}}>{message.id}</LinkButton>]&nbsp;
         </small>
         <b>
           {message.user.name}&nbsp;

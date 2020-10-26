@@ -19,11 +19,11 @@ const Container = ({ user, workspaces }) => {
 
   const onClickJoinChannel = useCallback((channel_id) => {
     history.push(`/workspaces/${workspaceId}/${channel_id}`);
-  }, [workspaceId]);
+  }, [history, workspaceId]);
 
   const onClickNewChannel = useCallback(()=> {
     history.push(`/workspaces/${workspaceId}/new`);  
-  }, [workspaceId]);
+  }, [history, workspaceId]);
 
   const isOwner = useMemo(() => {
     if(user && workspace) {

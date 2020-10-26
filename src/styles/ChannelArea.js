@@ -18,14 +18,4 @@ const NewChannel = styled.div`
   }
 `;
 
-const ChannelButton = styled.div`
-  padding: 8px;
-  cursor: pointer;
-
-  :hover {
-    background-color: ${({ theme }) => theme.hoverBackground};
-    text-decoration: underline;
-  }
-`;
-
-export { ChannelNavigator, NewChannel, ChannelButton };
+export { ChannelNavigator, NewChannel };

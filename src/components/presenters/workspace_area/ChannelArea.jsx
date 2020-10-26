@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChannelNavigator, NewChannel, ChannelButton } from '../../../styles/ChannelArea';
+import { ChannelNavigator, NewChannel } from '../../../styles/ChannelArea';
 import ChannelItemList from './ChannelItemList';
 
 const Component = ({ isOwner, onClickNewChannel, selectedChannelId, channels, onClickJoinChannel }) => {

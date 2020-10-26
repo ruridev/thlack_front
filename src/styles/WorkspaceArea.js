@@ -19,17 +19,6 @@ const NewWorkspace = styled.div`
   }
 `;
 
-const WorkspaceButton = styled.div`
-  padding: 8px;
-  cursor: pointer;
-  text-decoration: none;
-
-  :hover {
-    text-decoration: underline;
-    background-color: ${({ theme }) => theme.hoverBackground};
-  }
-`;
-
 const SearchWorkspace = styled.div`
   padding: 8px;
   cursor: pointer;
@@ -38,4 +27,4 @@ const SearchWorkspace = styled.div`
   }
 `
 
-export { WorkspaceNavigator, NewWorkspace, WorkspaceButton, SearchWorkspace };
+export { WorkspaceNavigator, NewWorkspace, SearchWorkspace };

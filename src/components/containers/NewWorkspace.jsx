@@ -1,22 +1,15 @@
 import React, { useCallback, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
-import { connect } from 'react-redux';
-import { useMutation } from '@apollo/client';
-import { CREATE_WORKSPACE } from '../../queries';
-import { setCurrentWorkspace } from '../../reducer/cache.action'
-import { addWorkspace } from '../../reducer/workspace.action'
 import NewWorkspace from '../presenters/new_workspace/NewWorkspace';
+import { useCreateWorkspace } from '../../graphql/mutations'
 
-const Container = ({ dispatchCreateWorkspace }) => {
+const Container = () => {
   const inputRef = useRef();
   const history = useHistory();
 
-  const [createWorkspace] = useMutation(CREATE_WORKSPACE, {
-    onCompleted({ createWorkspace: { workspace } }) {
-      dispatchCreateWorkspace(workspace)
-      history.push(`/workspaces/${workspace.id}/new`);
-    }
-  });
+  const createWorkspace = useCreateWorkspace(({ createWorkspace: { workspace } }) => {
+    history.push(`/workspaces/${workspace.id}/new`);
+  }, { storeAction: true });
 
   const createWorkspaceHandler = useCallback(() => {
     if(inputRef && inputRef.current) {
@@ -26,9 +19,7 @@ const Container = ({ dispatchCreateWorkspace }) => {
       }
 
       createWorkspace({
-        variables: {
-          name: inputRef.current.value,
-        },
+        name: inputRef.current.value,
       });
     }
   }, [inputRef, createWorkspace]);
@@ -40,13 +31,4 @@ const Container = ({ dispatchCreateWorkspace }) => {
   );
 }
 
-function dispatchToProps(dispatch) {
-  return {
-    dispatchCreateWorkspace: (workspace) => {
-      dispatch(addWorkspace(workspace));
-      dispatch(setCurrentWorkspace(workspace));
-    },
-  }
-}
-
-export default connect(null, dispatchToProps)(Container);
+export default React.memo(Container);

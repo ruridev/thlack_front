@@ -1,15 +1,15 @@
 import React from 'react';
-import { WorkspaceButton } from '../../../styles/WorkspaceArea';
+import { ClickableListItem } from '../../../styles';
 
 const Container = ({ workspaces, selectedWorkspaceId, onClickWorkspaceLink }) => {
   return (workspaces.map(workspace => (
-    <WorkspaceButton key={workspace.id}>
+    <ClickableListItem key={workspace.id}>
       <div onClick={() => onClickWorkspaceLink(workspace.id)}>
-        {workspace.id == selectedWorkspaceId ? 
+        {workspace.id === selectedWorkspaceId ? 
           <b>{workspace.name}</b>
         : `${workspace.name}`}
       </div>
-    </WorkspaceButton>
+    </ClickableListItem>
   )));
 }
 

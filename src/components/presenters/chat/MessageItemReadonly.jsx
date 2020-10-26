@@ -4,8 +4,7 @@ import ReactMarkdown from 'react-markdown'
 
 const Presenter = ({ message }) => {
   return (
-    <Message key={message.id}>
-      <a name={message.id}></a>
+    <Message>
       <div>
         <small>[{message.id}] </small>
         <b>{message.user?.name} 코멘트 작성자</b>&nbsp;

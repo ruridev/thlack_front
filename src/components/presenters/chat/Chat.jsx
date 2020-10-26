@@ -21,7 +21,7 @@ const Presenter = ({
   return (
     <Chat>
       <WorkspaceChannelName>
-        { `${currentChannel.workspace.name}#${currentChannel.name}` }
+        { `${currentChannel?.workspace?.name}#${currentChannel?.name}` }
       </WorkspaceChannelName> 
       <MessageItemList 
         cableApp={cableApp}

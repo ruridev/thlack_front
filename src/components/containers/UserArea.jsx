@@ -9,18 +9,24 @@ const Container = ({ theme, current_user, onClickSignOut, setThemeHandler }) => 
 
   const themeToggler = useCallback(() => {
     setThemeHandler(theme === 'light' ? 'dark' : 'light');
-  }, [theme]);
+  }, [setThemeHandler, theme]);
 
   const onClickChangeUser = useCallback(() => {
     history.push('/change_user');
-  }, []);
+  }, [history]);
+
+  const onClickUserName = useCallback((user_id) => {
+    history.push(`/users/${user_id}`);
+  }, [history]);
 
   return (
     <LoginUser 
-      user_name={current_user?.name}
+      user={current_user}
       onClickSignOut={onClickSignOut}
       themeToggler={themeToggler}
-      onClickChangeUser={onClickChangeUser} />
+      onClickChangeUser={onClickChangeUser}
+      onClickUserName={onClickUserName}
+      />
   );
 }
 

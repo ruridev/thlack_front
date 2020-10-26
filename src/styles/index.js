@@ -91,6 +91,20 @@ const AlignCenter = styled.div`
   grid-area: ac;
   text-align: center;
 `
+const AlignLeft = styled.div`
+  grid-area: ac;
+  text-align: left;
+`
+
+const ClickableListItem = styled.div`
+  padding: 8px;
+  cursor: pointer;
+
+  :hover {
+    background-color: ${({ theme }) => theme.hoverBackground};
+    text-decoration: underline;
+  }
+`;
 
 
 export { 
@@ -103,4 +117,6 @@ export {
   TextArea,
   AlignCenterWrapper,
   AlignCenter,
+  AlignLeft,
+  ClickableListItem,
 };
